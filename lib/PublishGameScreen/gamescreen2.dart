@@ -1,22 +1,24 @@
-// ignore_for_file: unused_import
+// ignore_for_file: unused_import, use_build_context_synchronously
 
 import 'dart:math';
-import 'dart:ui';
 
+import 'package:AAG/LeagueScreen/scheduledleaguescreen.dart';
+import 'package:AAG/PublishGameScreen/schedulegamescreen_2.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:AAG/PublishGameScreen/publishgamescreen.dart';
 import 'package:AAG/PublishGameScreen/scheduledgamescreen.dart';
 import 'package:AAG/tobeadded/gradient_button.dart';
 import 'package:intl/intl.dart';
 
-class GamesScreen extends StatefulWidget {
-  const GamesScreen({super.key});
+class PublishLudoScreen extends StatefulWidget {
+  const PublishLudoScreen({super.key});
 
   @override
-  _GamesScreenState createState() => _GamesScreenState();
+  _PublishLudoScreenState createState() => _PublishLudoScreenState();
 }
 
-class _GamesScreenState extends State<GamesScreen>
+class _PublishLudoScreenState extends State<PublishLudoScreen>
     with TickerProviderStateMixin {
   late TabController _tabController;
   int selectedThemeIndex = -1;
@@ -25,11 +27,6 @@ class _GamesScreenState extends State<GamesScreen>
   TimeOfDay? selectedTime;
   String? scheduledInfo;
   late AnimationController _gradientAnimationController;
-  late Animation<double> _gradientAnimation;
-  late Animation<double> _rotationAnimation;
-  late Animation<double> _scaleAnimation;
-  late Animation<Color?> _colorAnimation1;
-  late Animation<Color?> _colorAnimation2;
 
   @override
   void initState() {
@@ -40,46 +37,6 @@ class _GamesScreenState extends State<GamesScreen>
       duration: const Duration(seconds: 3),
       vsync: this,
     )..repeat();
-
-    _gradientAnimation = Tween<double>(
-      begin: 0.0,
-      end: 2 * 3.14159, // Full rotation in radians
-    ).animate(CurvedAnimation(
-      parent: _gradientAnimationController,
-      curve: Curves.easeInOutCubic,
-    ));
-
-    _rotationAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _gradientAnimationController,
-      curve: Curves.elasticOut,
-    ));
-
-    _scaleAnimation = Tween<double>(
-      begin: 0.95,
-      end: 1.05,
-    ).animate(CurvedAnimation(
-      parent: _gradientAnimationController,
-      curve: Curves.easeInOutSine,
-    ));
-
-    _colorAnimation1 = ColorTween(
-      begin: Colors.purple[900],
-      end: Colors.deepPurple[700],
-    ).animate(CurvedAnimation(
-      parent: _gradientAnimationController,
-      curve: const Interval(0.0, 0.5, curve: Curves.easeInOutCubic),
-    ));
-
-    _colorAnimation2 = ColorTween(
-      begin: Colors.deepPurple[700],
-      end: Colors.purple[900],
-    ).animate(CurvedAnimation(
-      parent: _gradientAnimationController,
-      curve: const Interval(0.5, 1.0, curve: Curves.easeInOutCubic),
-    ));
   }
 
   @override
@@ -90,164 +47,148 @@ class _GamesScreenState extends State<GamesScreen>
   }
 
   Future<void> _showSchedulePopup() async {
+    DateTime? selectedDate;
+    TimeOfDay? selectedTime;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: const Color.fromARGB(255, 102, 44, 144),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
       ),
       builder: (BuildContext context) {
-        return AnimatedBuilder(
-          animation: _gradientAnimationController,
-          builder: (context, child) {
-            return ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(25)),
-              child: CustomPaint(
-                painter: ComplexGradientPainter(
-                  animation: _gradientAnimation,
-                  rotationAnimation: _rotationAnimation,
-                  scaleAnimation: _scaleAnimation,
-                  colorAnimation1: _colorAnimation1,
-                  colorAnimation2: _colorAnimation2,
-                ),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius:
-                          const BorderRadius.vertical(top: Radius.circular(25)),
-                      color: Colors.black.withOpacity(0.1),
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Container(
+              decoration: BoxDecoration(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(25)),
+              ),
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                    20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Schedule Game',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
-                    child: Padding(
-                        padding: EdgeInsets.fromLTRB(20, 20, 20,
-                            MediaQuery.of(context).viewInsets.bottom + 20),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Text(
-                              'Schedule Game',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                shadows: [
-                                  Shadow(
-                                    blurRadius: 8.0,
-                                    color: Colors.black26,
-                                    offset: Offset(2.0, 2.0),
-                                  ),
-                                ],
-                              ),
+                    Container(
+                      margin: const EdgeInsets.symmetric(vertical: 15),
+                      height: 1,
+                      color: Colors.white24,
+                    ),
+                    ListTile(
+                      title: const Text(
+                        'Select Date',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            selectedDate != null
+                                ? DateFormat('EEE, MMM d, yyyy')
+                                    .format(selectedDate!)
+                                : 'Choose a date',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.7),
                             ),
-                            // Add a subtle shimmer effect to the divider
-                            Container(
-                              margin: const EdgeInsets.symmetric(vertical: 15),
-                              height: 1,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment(_gradientAnimation.value, 0),
-                                  end: Alignment(-_gradientAnimation.value, 0),
-                                  colors: const [
-                                    Colors.white24,
-                                    Colors.white,
-                                    Colors.white24,
-                                  ],
-                                ),
-                              ),
+                          ),
+                        ],
+                      ),
+                      trailing: Icon(
+                        Icons.calendar_today,
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                      onTap: () async {
+                        DateTime? pickedDate = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime(2101),
+                        );
+                        if (pickedDate != null) {
+                          setState(() {
+                            selectedDate = pickedDate;
+                          });
+                        }
+                      },
+                    ),
+                    ListTile(
+                      title: const Text(
+                        'Select Time',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            selectedTime != null
+                                ? selectedTime!.format(context)
+                                : 'Choose a time',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.7),
                             ),
-                            // Rest of your existing popup content
-                            ListTile(
-                              title: const Text(
-                                'Select Date',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              subtitle: Text(
-                                selectedDate != null
-                                    ? DateFormat('EEE, MMM d, yyyy')
-                                        .format(selectedDate!)
-                                    : 'Choose a date',
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.7),
-                                ),
-                              ),
-                              trailing: Icon(
-                                Icons.calendar_today,
-                                color: Colors.white.withOpacity(0.9),
-                              ),
-                              onTap: () async {
-                                DateTime? pickedDate = await showDatePicker(
-                                  context: context,
-                                  initialDate: DateTime.now(),
-                                  firstDate: DateTime.now(),
-                                  lastDate: DateTime(2101),
-                                );
-                                if (pickedDate != null) {
-                                  setState(() {
-                                    selectedDate = pickedDate;
-                                  });
-                                }
-                              },
+                          ),
+                        ],
+                      ),
+                      trailing: Icon(
+                        Icons.access_time,
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                      onTap: () async {
+                        TimeOfDay? pickedTime = await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay.now(),
+                        );
+                        if (pickedTime != null) {
+                          setState(() {
+                            selectedTime = pickedTime;
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (selectedDate != null && selectedTime != null) {
+                          setState(() {
+                            scheduledInfo =
+                                "Scheduled on ${DateFormat('EEE, MMM d, yyyy').format(selectedDate!)} at ${selectedTime!.format(context)}";
+                          });
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const EditableScheduledGameScreen(),
                             ),
-                            ListTile(
-                              title: const Text(
-                                'Select Time',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              subtitle: Text(
-                                selectedTime != null
-                                    ? selectedTime!.format(context)
-                                    : 'Choose a time',
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.7),
-                                ),
-                              ),
-                              trailing: Icon(
-                                Icons.access_time,
-                                color: Colors.white.withOpacity(0.9),
-                              ),
-                              onTap: () async {
-                                TimeOfDay? pickedTime = await showTimePicker(
-                                  context: context,
-                                  initialTime: TimeOfDay.now(),
-                                );
-                                if (pickedTime != null) {
-                                  setState(() {
-                                    selectedTime = pickedTime;
-                                  });
-                                }
-                              },
-                            ),
-                            const SizedBox(height: 20),
-                            CustomButton(
-                              onTap: () {
-                                if (selectedDate != null &&
-                                    selectedTime != null) {
-                                  setState(() {
-                                    scheduledInfo =
-                                        "Scheduled on ${DateFormat('EEE, MMM d, yyyy').format(selectedDate!)} at ${selectedTime!.format(context)}";
-                                  });
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          const ScheduledGameScreen(),
-                                    ),
-                                  );
-                                }
-                              },
-                              text: 'Schedule',
-                            ),
-                          ],
-                        )),
-                  ),
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.black,
+                        backgroundColor: Colors.white,
+                        minimumSize: Size(double.infinity, 48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text('Schedule'),
+                    ),
+                  ],
                 ),
               ),
             );
@@ -260,44 +201,42 @@ class _GamesScreenState extends State<GamesScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
+      extendBodyBehindAppBar: false,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
         ),
-        title: const Text(
-          'GAMES',
-          style: TextStyle(color: Colors.white),
+        title: Text(
+          "PUBLISH GAMES",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
+        backgroundColor: const Color.fromARGB(255, 102, 44, 144),
       ),
       body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('lib/images/idkbg.jpg'),
-            fit: BoxFit.cover,
-          ),
-        ),
+        decoration: BoxDecoration(color: Colors.white),
         child: Column(
           children: [
-            const SizedBox(height: 70),
+            const SizedBox(
+              height: 10,
+            ),
             TabBar(
               controller: _tabController,
               indicatorColor: Colors.orange,
               indicatorWeight: 3,
-              labelColor: Colors.orange,
-              unselectedLabelColor: Colors.white,
-              onTap: (_) {
-                _tabController.index = _tabController.previousIndex;
-              },
+              labelColor: Colors.orange, // Active tab font color
+              unselectedLabelColor: Colors.black, // Inactive tab font color
               tabs: const [
-                Tab(text: 'THEMES'),
-                Tab(text: 'ENTRY FEES'),
+                Tab(
+                  text: 'THEMES',
+                ),
+                Tab(
+                  text: 'ENTRY FEES',
+                ),
               ],
             ),
-            // const SizedBox(height: 10),
             Expanded(
               child: TabBarView(
                 controller: _tabController,
@@ -308,39 +247,6 @@ class _GamesScreenState extends State<GamesScreen>
                 ],
               ),
             ),
-            // if (scheduledInfo != null)
-            //   Padding(
-            //     padding: const EdgeInsets.all(10),
-            //     child: Card(
-            //       color: Colors.white,
-            //       elevation: 4,
-            //       shape: RoundedRectangleBorder(
-            //         borderRadius: BorderRadius.circular(10),
-            //       ),
-            //       child: Padding(
-            //         padding: const EdgeInsets.all(10),
-            //         child: Column(
-            //           crossAxisAlignment: CrossAxisAlignment.start,
-            //           children: [
-            //             const Text(
-            //               'Scheduled Game',
-            //               style: TextStyle(
-            //                 fontSize: 16,
-            //                 fontWeight: FontWeight.bold,
-            //                 color: Colors.black,
-            //               ),
-            //             ),
-            //             const SizedBox(height: 5),
-            //             Text(
-            //               scheduledInfo!,
-            //               style: const TextStyle(
-            //                   fontSize: 14, color: Colors.black87),
-            //             ),
-            //           ],
-            //         ),
-            //       ),
-            //     ),
-            //   ),
           ],
         ),
       ),
@@ -356,7 +262,9 @@ class _GamesScreenState extends State<GamesScreen>
           children: [
             Expanded(
               child: Padding(
-                padding: EdgeInsets.all(constraints.maxWidth * 0.04),
+                padding: EdgeInsets.symmetric(
+                    horizontal: constraints.maxWidth * 0.04,
+                    vertical: constraints.maxWidth * 0.08),
                 child: GridView.builder(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: constraints.maxWidth > 600 ? 4 : 3,
@@ -374,18 +282,24 @@ class _GamesScreenState extends State<GamesScreen>
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: selectedThemeIndex == index
-                                ? Colors.purple
-                                : Colors.transparent,
-                            width: 2,
+                                ? Color.fromRGBO(255, 146, 29, 1)
+                                : Color.fromARGB(255, 102, 44, 144),
+                            /**
+                                 * Color.fromRGBO(255, 146, 29, 1),
+
+
+       Color.fromARGB(255, 102, 44, 144),
+                                 */
+                            width: selectedThemeIndex == index ? 4 : 1,
                           ),
                         ),
                         child: Stack(
                           children: [
                             ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(4),
                               child: Image.asset(
                                 'lib/images/jungle.jpeg',
                                 fit: BoxFit.cover,
@@ -427,12 +341,19 @@ class _GamesScreenState extends State<GamesScreen>
                             if (index >= 2)
                               Container(
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(8),
                                   color: Colors.black.withOpacity(0.7),
                                 ),
-                                child: const Center(
-                                  child: Icon(Icons.lock,
-                                      color: Colors.white, size: 24),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.lock,
+                                        color: Colors.white, size: 20),
+                                    const SizedBox(
+                                      height: 5,
+                                    ),
+                                    _buildHeader(constraints),
+                                  ],
                                 ),
                               ),
                           ],
@@ -471,7 +392,9 @@ class _GamesScreenState extends State<GamesScreen>
           children: [
             Expanded(
               child: Padding(
-                padding: EdgeInsets.all(constraints.maxWidth * 0.04),
+                padding: EdgeInsets.symmetric(
+                    horizontal: constraints.maxWidth * 0.04,
+                    vertical: constraints.maxWidth * 0.08),
                 child: GridView.builder(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: constraints.maxWidth > 600 ? 4 : 3,
@@ -489,7 +412,7 @@ class _GamesScreenState extends State<GamesScreen>
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: selectedFeeIndex == index
                                 ? Colors.orange
@@ -500,7 +423,7 @@ class _GamesScreenState extends State<GamesScreen>
                         child: Stack(
                           children: [
                             ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(8),
                               child: Image.asset(
                                 'lib/images/g1.png',
                                 fit: BoxFit.cover,
@@ -516,7 +439,7 @@ class _GamesScreenState extends State<GamesScreen>
                                     colors: [Colors.orange, Colors.deepOrange],
                                   ),
                                   borderRadius: BorderRadius.vertical(
-                                    bottom: Radius.circular(10),
+                                    bottom: Radius.circular(4),
                                   ),
                                 ),
                                 padding:
@@ -555,7 +478,7 @@ class _GamesScreenState extends State<GamesScreen>
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const GamePublishedScreen(),
+                            builder: (context) => const PublishedGameScreen(),
                           ),
                         );
                       },
@@ -575,6 +498,51 @@ class _GamesScreenState extends State<GamesScreen>
           ],
         );
       },
+    );
+  }
+
+  Widget _buildHeader(BoxConstraints constraints) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Container(
+          height: 2,
+          margin: const EdgeInsets.symmetric(horizontal: 0),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color.fromARGB(255, 102, 44, 144),
+                Colors.orange.withOpacity(0.7),
+                Color.fromARGB(255, 102, 44, 144),
+              ],
+            ),
+          ),
+        ),
+        CustomPaint(
+          painter: HexagonPainter(
+              color: Color.fromARGB(255, 102, 44, 144),
+              gridAspectRatio: constraints.maxWidth > 600 ? 0.7 : 0.5,
+              constraintMaxWidth: constraints.maxWidth),
+          child: Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    '  LEVEL B',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -652,4 +620,49 @@ class ComplexGradientPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(ComplexGradientPainter oldDelegate) => true;
+}
+
+class HexagonPainter extends CustomPainter {
+  final Color color;
+  final double gridAspectRatio;
+  final double constraintMaxWidth;
+
+  HexagonPainter(
+      {required this.color,
+      required this.gridAspectRatio,
+      required this.constraintMaxWidth});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    // Calculate card width based on grid constraints
+    double cardWidth = constraintMaxWidth > 600
+        ? (constraintMaxWidth * 0.92) / 4 // 4 columns on wider screens
+        : (constraintMaxWidth * 0.92) / 3; // 3 columns on narrower screens
+
+    // Adjust path to match card width proportions
+    Path path = Path();
+    path.moveTo(cardWidth * 0.2, size.height * 0.5);
+    path.lineTo(cardWidth * 0.3, 0);
+    path.lineTo(cardWidth * 0.7, 0);
+    path.lineTo(cardWidth * 0.8, size.height * 0.5);
+    path.lineTo(cardWidth * 0.7, size.height);
+    path.lineTo(cardWidth * 0.3, size.height);
+    path.close();
+
+    canvas.drawPath(path, paint);
+
+    Paint borderPaint = Paint()
+      ..color = const Color(0xFFE97411)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+
+    canvas.drawPath(path, borderPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

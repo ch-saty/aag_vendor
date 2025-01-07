@@ -9,22 +9,27 @@ import 'package:AAG/PublishGameScreen/scheduledgamescreen.dart';
 import 'package:AAG/tobeadded/gradient_button.dart';
 import 'package:intl/intl.dart';
 
-class Tournamentscreen extends StatefulWidget {
-  const Tournamentscreen({super.key});
+import '../PublishGameScreen/gamescreen2.dart';
+
+class PublishTournamentscreen extends StatefulWidget {
+  const PublishTournamentscreen({super.key});
 
   @override
-  TournamentscreenState createState() => TournamentscreenState();
+  PublishTournamentscreenState createState() => PublishTournamentscreenState();
 }
 
-class TournamentscreenState extends State<Tournamentscreen>
+class PublishTournamentscreenState extends State<PublishTournamentscreen>
     with TickerProviderStateMixin {
   late TabController _tabController;
-  int selectedThemeIndex = -1;
-  int selectedFeeIndex = -1;
+  int selectedThemeIndex = 0;
+  int selectedFeeIndex = 0;
+  int selectedParticipantIndex = -1;
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
   String? scheduledInfo;
-  late int selectedFee;
+  int selectedFee = 2;
+  final List<int> fees = [2, 3, 4, 5, 6, 8, 10, 50, 100];
+  final List<int> participantCounts = [8, 16, 32, 64, 128, 256, 512, 1024];
   late AnimationController _gradientAnimationController;
   late Animation<double> _gradientAnimation;
   late Animation<double> _rotationAnimation;
@@ -90,206 +95,34 @@ class TournamentscreenState extends State<Tournamentscreen>
     super.dispose();
   }
 
-  // Future<void> _showSchedulePopup() async {
-  //   showModalBottomSheet(
-  //     context: context,
-  //     isScrollControlled: true,
-  //     backgroundColor: Colors.transparent,
-  //     shape: const RoundedRectangleBorder(
-  //       borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
-  //     ),
-  //     builder: (BuildContext context) {
-  //       return AnimatedBuilder(
-  //         animation: _gradientAnimationController,
-  //         builder: (context, child) {
-  //           return ClipRRect(
-  //             borderRadius:
-  //                 const BorderRadius.vertical(top: Radius.circular(25)),
-  //             child: CustomPaint(
-  //               painter: ComplexGradientPainter(
-  //                 animation: _gradientAnimation,
-  //                 rotationAnimation: _rotationAnimation,
-  //                 scaleAnimation: _scaleAnimation,
-  //                 colorAnimation1: _colorAnimation1,
-  //                 colorAnimation2: _colorAnimation2,
-  //               ),
-  //               child: BackdropFilter(
-  //                 filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-  //                 child: Container(
-  //                   decoration: BoxDecoration(
-  //                     borderRadius:
-  //                         const BorderRadius.vertical(top: Radius.circular(25)),
-  //                     color: Colors.black.withOpacity(0.1),
-  //                   ),
-  //                   child: Padding(
-  //                       padding: EdgeInsets.fromLTRB(20, 20, 20,
-  //                           MediaQuery.of(context).viewInsets.bottom + 20),
-  //                       child: Column(
-  //                         mainAxisSize: MainAxisSize.min,
-  //                         children: [
-  //                           const Text(
-  //                             'Schedule Game',
-  //                             style: TextStyle(
-  //                               fontSize: 24,
-  //                               fontWeight: FontWeight.bold,
-  //                               color: Colors.white,
-  //                               shadows: [
-  //                                 Shadow(
-  //                                   blurRadius: 8.0,
-  //                                   color: Colors.black26,
-  //                                   offset: Offset(2.0, 2.0),
-  //                                 ),
-  //                               ],
-  //                             ),
-  //                           ),
-  //                           // Add a subtle shimmer effect to the divider
-  //                           Container(
-  //                             margin: const EdgeInsets.symmetric(vertical: 15),
-  //                             height: 1,
-  //                             decoration: BoxDecoration(
-  //                               gradient: LinearGradient(
-  //                                 begin: Alignment(_gradientAnimation.value, 0),
-  //                                 end: Alignment(-_gradientAnimation.value, 0),
-  //                                 colors: const [
-  //                                   Colors.white24,
-  //                                   Colors.white,
-  //                                   Colors.white24,
-  //                                 ],
-  //                               ),
-  //                             ),
-  //                           ),
-  //                           // Rest of your existing popup content
-  //                           ListTile(
-  //                             title: const Text(
-  //                               'Select Date',
-  //                               style: TextStyle(
-  //                                 color: Colors.white,
-  //                                 fontWeight: FontWeight.w500,
-  //                               ),
-  //                             ),
-  //                             subtitle: Text(
-  //                               selectedDate != null
-  //                                   ? DateFormat('EEE, MMM d, yyyy')
-  //                                       .format(selectedDate!)
-  //                                   : 'Choose a date',
-  //                               style: TextStyle(
-  //                                 color: Colors.white.withOpacity(0.7),
-  //                               ),
-  //                             ),
-  //                             trailing: Icon(
-  //                               Icons.calendar_today,
-  //                               color: Colors.white.withOpacity(0.9),
-  //                             ),
-  //                             onTap: () async {
-  //                               DateTime? pickedDate = await showDatePicker(
-  //                                 context: context,
-  //                                 initialDate: DateTime.now(),
-  //                                 firstDate: DateTime.now(),
-  //                                 lastDate: DateTime(2101),
-  //                               );
-  //                               if (pickedDate != null) {
-  //                                 setState(() {
-  //                                   selectedDate = pickedDate;
-  //                                 });
-  //                               }
-  //                             },
-  //                           ),
-  //                           ListTile(
-  //                             title: const Text(
-  //                               'Select Time',
-  //                               style: TextStyle(
-  //                                 color: Colors.white,
-  //                                 fontWeight: FontWeight.w500,
-  //                               ),
-  //                             ),
-  //                             subtitle: Text(
-  //                               selectedTime != null
-  //                                   ? selectedTime!.format(context)
-  //                                   : 'Choose a time',
-  //                               style: TextStyle(
-  //                                 color: Colors.white.withOpacity(0.7),
-  //                               ),
-  //                             ),
-  //                             trailing: Icon(
-  //                               Icons.access_time,
-  //                               color: Colors.white.withOpacity(0.9),
-  //                             ),
-  //                             onTap: () async {
-  //                               TimeOfDay? pickedTime = await showTimePicker(
-  //                                 context: context,
-  //                                 initialTime: TimeOfDay.now(),
-  //                               );
-  //                               if (pickedTime != null) {
-  //                                 setState(() {
-  //                                   selectedTime = pickedTime;
-  //                                 });
-  //                               }
-  //                             },
-  //                           ),
-  //                           const SizedBox(height: 20),
-  //                           CustomButton(
-  //                             onTap: () {
-  //                               if (selectedDate != null &&
-  //                                   selectedTime != null) {
-  //                                 setState(() {
-  //                                   scheduledInfo =
-  //                                       "Scheduled on ${DateFormat('EEE, MMM d, yyyy').format(selectedDate!)} at ${selectedTime!.format(context)}";
-  //                                 });
-  //                                 Navigator.push(
-  //                                   context,
-  //                                   MaterialPageRoute(
-  //                                     builder: (context) =>
-  //                                         const ScheduledGameScreen(),
-  //                                   ),
-  //                                 );
-  //                               }
-  //                             },
-  //                             text: 'Schedule',
-  //                           ),
-  //                         ],
-  //                       )),
-  //                 ),
-  //               ),
-  //             ),
-  //           );
-  //         },
-  //       );
-  //     },
-  //   );
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
+      extendBodyBehindAppBar: false,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
         ),
-        title: const Text(
-          'GAMES',
-          style: TextStyle(color: Colors.white),
+        title: Text(
+          "PUBLISH GAMES",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
+        backgroundColor: const Color.fromARGB(255, 102, 44, 144),
       ),
       body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('lib/images/idkbg.jpg'),
-            fit: BoxFit.cover,
-          ),
-        ),
+        color: Colors.white,
         child: Column(
           children: [
-            const SizedBox(height: 70),
+            // Custom AppBar section
             TabBar(
               controller: _tabController,
               indicatorColor: Colors.orange,
               indicatorWeight: 3,
               labelColor: Colors.orange,
-              unselectedLabelColor: Colors.white,
+              unselectedLabelColor: Colors.black,
               onTap: (_) {
                 _tabController.index = _tabController.previousIndex;
               },
@@ -299,11 +132,10 @@ class TournamentscreenState extends State<Tournamentscreen>
                 Tab(text: 'PARTICIPANTS'),
               ],
             ),
-            // const SizedBox(height: 10),
             Expanded(
               child: TabBarView(
                 controller: _tabController,
-                physics: const NeverScrollableScrollPhysics(),
+                // physics: const NeverScrollableScrollPhysics(),
                 children: [
                   _buildThemesView(),
                   _buildEntryFeesView(),
@@ -326,7 +158,9 @@ class TournamentscreenState extends State<Tournamentscreen>
           children: [
             Expanded(
               child: Padding(
-                padding: EdgeInsets.all(constraints.maxWidth * 0.04),
+                padding: EdgeInsets.symmetric(
+                    horizontal: constraints.maxWidth * 0.04,
+                    vertical: constraints.maxWidth * 0.08),
                 child: GridView.builder(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: constraints.maxWidth > 600 ? 4 : 3,
@@ -344,18 +178,24 @@ class TournamentscreenState extends State<Tournamentscreen>
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: selectedThemeIndex == index
-                                ? Colors.purple
-                                : Colors.transparent,
-                            width: 2,
+                                ? Color.fromRGBO(255, 146, 29, 1)
+                                : Color.fromARGB(255, 102, 44, 144),
+                            /**
+                                 * Color.fromRGBO(255, 146, 29, 1),
+
+
+       Color.fromARGB(255, 102, 44, 144),
+                                 */
+                            width: selectedThemeIndex == index ? 4 : 1,
                           ),
                         ),
                         child: Stack(
                           children: [
                             ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(4),
                               child: Image.asset(
                                 'lib/images/jungle.jpeg',
                                 fit: BoxFit.cover,
@@ -397,12 +237,19 @@ class TournamentscreenState extends State<Tournamentscreen>
                             if (index >= 2)
                               Container(
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(8),
                                   color: Colors.black.withOpacity(0.7),
                                 ),
-                                child: const Center(
-                                  child: Icon(Icons.lock,
-                                      color: Colors.white, size: 24),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.lock,
+                                        color: Colors.white, size: 20),
+                                    const SizedBox(
+                                      height: 5,
+                                    ),
+                                    _buildHeader(constraints),
+                                  ],
                                 ),
                               ),
                           ],
@@ -432,24 +279,64 @@ class TournamentscreenState extends State<Tournamentscreen>
     );
   }
 
-  Widget _buildEntryFeesView() {
-    final fees = [2, 3, 4, 5, 6, 8, 10, 50, 100];
+  Widget _buildHeader(BoxConstraints constraints) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Container(
+          height: 2,
+          margin: const EdgeInsets.symmetric(horizontal: 0),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color.fromARGB(255, 102, 44, 144),
+                Colors.orange.withOpacity(0.7),
+                Color.fromARGB(255, 102, 44, 144),
+              ],
+            ),
+          ),
+        ),
+        CustomPaint(
+          painter: HexagonPainter(
+              color: Color.fromARGB(255, 102, 44, 144),
+              gridAspectRatio: constraints.maxWidth > 600 ? 0.7 : 0.5,
+              constraintMaxWidth: constraints.maxWidth),
+          child: const Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 0, vertical: 5),
+              child: Text(
+                'Level B',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  letterSpacing: 1,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 
+  Widget _buildEntryFeesView() {
     return LayoutBuilder(
       builder: (context, constraints) {
         return Column(
           children: [
             Expanded(
               child: Padding(
-                padding: EdgeInsets.all(constraints.maxWidth * 0.04),
+                padding: EdgeInsets.symmetric(
+                    horizontal: constraints.maxWidth * 0.04,
+                    vertical: constraints.maxWidth * 0.08),
                 child: GridView.builder(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: constraints.maxWidth > 600 ? 4 : 3,
-                    mainAxisSpacing: 15,
-                    crossAxisSpacing: 15,
+                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 10,
                     childAspectRatio: 0.7,
                   ),
-                  itemCount: 9,
+                  itemCount: fees.length,
                   itemBuilder: (context, index) {
                     return GestureDetector(
                       onTap: () {
@@ -460,7 +347,7 @@ class TournamentscreenState extends State<Tournamentscreen>
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: selectedFeeIndex == index
                                 ? Colors.orange
@@ -471,9 +358,9 @@ class TournamentscreenState extends State<Tournamentscreen>
                         child: Stack(
                           children: [
                             ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(8),
                               child: Image.asset(
-                                'lib/images/g1.png',
+                                'lib/images/ludo.png',
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -487,7 +374,7 @@ class TournamentscreenState extends State<Tournamentscreen>
                                     colors: [Colors.orange, Colors.deepOrange],
                                   ),
                                   borderRadius: BorderRadius.vertical(
-                                    bottom: Radius.circular(10),
+                                    bottom: Radius.circular(4),
                                   ),
                                 ),
                                 padding:
@@ -544,96 +431,107 @@ class TournamentscreenState extends State<Tournamentscreen>
           children: [
             Expanded(
               child: ListView.builder(
-                padding: const EdgeInsets.all(5),
+                padding: EdgeInsets.symmetric(
+                    horizontal: constraints.maxWidth * 0.04,
+                    vertical: constraints.maxWidth * 0.08),
                 itemCount: participantCounts.length,
                 itemBuilder: (context, index) {
                   final totalPool = selectedFee;
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    height: 100, // Fixed height for the container
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.deepPurple, width: 1),
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.deepPurple.withOpacity(0.3),
-                          Colors.purple.withOpacity(0.3),
-                        ],
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Leading image
-                        Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Image.asset(
-                              'lib/images/g1.png',
-                              height:
-                                  84, // Matches container height minus padding
-                              fit: BoxFit.cover,
-                            ),
-                          ),
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        selectedParticipantIndex = index;
+                      });
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      height: 100,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: selectedParticipantIndex == index
+                              ? Colors.orange
+                              : Colors.black,
+                          width: selectedParticipantIndex == index ? 2 : 1,
                         ),
-
-                        // Player count section
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset(
-                              'lib/images/playerg.png',
-                              width: 50,
-                              height: 50,
-                            ),
-                            Text(
-                              '${participantCounts[index]}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.purple.withOpacity(0.3),
+                            Colors.deepPurple.withOpacity(0.3),
                           ],
                         ),
-
-                        // Pool fee section
-                        Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: Center(
-                            child: Container(
-                              width: 70,
-                              height:
-                                  40, // Added height to ensure it's easier to center vertically
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [Colors.orange, Colors.deepOrange],
-                                ),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Center(
-                                // This ensures that the text is centered
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(
-                                      Icons.currency_rupee,
-                                      color: Colors.white,
-                                      size: 14,
-                                    ),
-                                    Text(
-                                      '$totalPool',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Leading image
+                          Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Image.asset(
+                                'lib/images/g1.png',
+                                height: 84,
+                                fit: BoxFit.cover,
                               ),
                             ),
                           ),
-                        )
-                      ],
+
+                          // Player count section
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'lib/images/playerg.png',
+                                width: 50,
+                                height: 50,
+                              ),
+                              Text(
+                                '${participantCounts[index]}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          // Pool fee section
+                          Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Center(
+                              child: Container(
+                                width: 70,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [Colors.orange, Colors.deepOrange],
+                                  ),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Center(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(
+                                        Icons.currency_rupee,
+                                        color: Colors.white,
+                                        size: 14,
+                                      ),
+                                      Text(
+                                        '$totalPool',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   );
                 },

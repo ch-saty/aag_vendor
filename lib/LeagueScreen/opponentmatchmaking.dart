@@ -1,17 +1,22 @@
 // ignore_for_file: unused_import, unused_local_variable, use_build_context_synchronously
 
 import 'dart:math';
-import 'dart:ui';
 
+import 'package:AAG/LeagueScreen/Opponent_SearchScreen.dart/overlay.dart';
+import 'package:AAG/LeagueScreen/challenger_waiting_page.dart';
 import 'package:AAG/LeagueScreen/publishedleaguescreen.dart';
 import 'package:AAG/LeagueScreen/scheduledleaguescreen.dart';
+import 'package:AAG/tobeadded/opponent_status_overlay.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:AAG/PublishGameScreen/publishgamescreen.dart';
 import 'package:AAG/PublishGameScreen/scheduledgamescreen.dart';
 import 'package:AAG/tobeadded/gradient_button.dart';
 import 'package:intl/intl.dart';
+
+import '../TournamentScreen/scheduletournamentscreen_2.dart';
 
 class ComplexGradientPainter extends CustomPainter {
   final Animation<double> animation;
@@ -89,7 +94,9 @@ class ComplexGradientPainter extends CustomPainter {
 }
 
 class OpponentSearchScreen extends StatefulWidget {
-  const OpponentSearchScreen({super.key});
+  final String poolPrize;
+
+  const OpponentSearchScreen({super.key, required this.poolPrize});
 
   @override
   _OpponentSearchScreenState createState() => _OpponentSearchScreenState();
@@ -105,18 +112,12 @@ class _OpponentSearchScreenState extends State<OpponentSearchScreen>
   late List<Animation<double>> _rippleAnimations;
   late AnimationController _flickerController;
   late AnimationController _gradientAnimationController;
-  late Animation<double> _gradientAnimation;
-  late Animation<double> _rotationAnimation;
-  late Animation<double> _scaleAnimation;
-  late Animation<Color?> _colorAnimation1;
-  late Animation<Color?> _colorAnimation2;
   bool _isSearching = false;
   int _remainingTime = 25;
   Timer? _timer;
   String? _opponentName;
   bool _showInitialIcons = true;
   bool _showAllChIcons = false;
-  bool _showOnlyCenterIcon = false;
   bool _opponentFound = false;
   bool _challengeAccepted = false;
   bool _vsVisible = false;
@@ -128,46 +129,6 @@ class _OpponentSearchScreenState extends State<OpponentSearchScreen>
       duration: const Duration(seconds: 3),
       vsync: this,
     )..repeat();
-
-    _gradientAnimation = Tween<double>(
-      begin: 0.0,
-      end: 2 * 3.14159, // Full rotation in radians
-    ).animate(CurvedAnimation(
-      parent: _gradientAnimationController,
-      curve: Curves.easeInOutCubic,
-    ));
-
-    _rotationAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _gradientAnimationController,
-      curve: Curves.elasticOut,
-    ));
-
-    _scaleAnimation = Tween<double>(
-      begin: 0.95,
-      end: 1.05,
-    ).animate(CurvedAnimation(
-      parent: _gradientAnimationController,
-      curve: Curves.easeInOutSine,
-    ));
-
-    _colorAnimation1 = ColorTween(
-      begin: Colors.purple[900],
-      end: Colors.deepPurple[700],
-    ).animate(CurvedAnimation(
-      parent: _gradientAnimationController,
-      curve: const Interval(0.0, 0.5, curve: Curves.easeInOutCubic),
-    ));
-
-    _colorAnimation2 = ColorTween(
-      begin: Colors.deepPurple[700],
-      end: Colors.purple[900],
-    ).animate(CurvedAnimation(
-      parent: _gradientAnimationController,
-      curve: const Interval(0.5, 1.0, curve: Curves.easeInOutCubic),
-    ));
     _rippleController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 10),
@@ -244,26 +205,18 @@ class _OpponentSearchScreenState extends State<OpponentSearchScreen>
           return Stack(
             children: [
               Dialog(
-                backgroundColor: Colors.transparent,
                 child: Container(
                   width: MediaQuery.of(context).size.width * 0.8,
-                  height: MediaQuery.of(context).size.height * 0.61,
+                  height: MediaQuery.of(context).size.height * 0.51,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color.fromRGBO(53, 3, 90, 1),
-                        Color.fromRGBO(81, 9, 133, 1),
-                        Color.fromRGBO(53, 3, 90, 1),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8)),
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Text(
                             'Available Challengers',
@@ -273,10 +226,10 @@ class _OpponentSearchScreenState extends State<OpponentSearchScreen>
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.close, color: Colors.white),
-                            onPressed: () => Navigator.pop(context),
-                          ),
+                          // IconButton(
+                          //   icon: const Icon(Icons.close, color: Colors.black),
+                          //   onPressed: () => Navigator.pop(context),
+                          // ),
                         ],
                       ),
                       const SizedBox(height: 10),
@@ -298,7 +251,7 @@ class _OpponentSearchScreenState extends State<OpponentSearchScreen>
                                     child: Text(
                                       players[index],
                                       style:
-                                          const TextStyle(color: Colors.white),
+                                          const TextStyle(color: Colors.black),
                                     ),
                                   ),
                                   GestureDetector(
@@ -320,13 +273,13 @@ class _OpponentSearchScreenState extends State<OpponentSearchScreen>
                                         border: Border.all(
                                             color: isSelected
                                                 ? Colors.green
-                                                : Colors.white),
+                                                : Colors.orange),
                                       ),
                                       child: Icon(
                                         Icons.check_circle,
                                         color: isSelected
                                             ? Colors.green
-                                            : Colors.white,
+                                            : Colors.orange,
                                         size: 20,
                                       ),
                                     ),
@@ -361,9 +314,9 @@ class _OpponentSearchScreenState extends State<OpponentSearchScreen>
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) =>
-                                      const ScheduledLeagueScreen(),
-                                ),
+                                    builder: (context) => ChallengeWaitTime(
+                                        selectedPlayer:
+                                            players[selectedPlayer!])),
                               );
                             });
                           }
@@ -379,46 +332,45 @@ class _OpponentSearchScreenState extends State<OpponentSearchScreen>
                   top: 0,
                   left: 0,
                   right: 0,
-                  child: TweenAnimationBuilder(
-                    tween: Tween<double>(begin: -100, end: 0),
-                    duration: const Duration(milliseconds: 500),
-                    builder: (context, double value, child) {
-                      return Transform.translate(
-                        offset: Offset(0, value),
-                        child: Container(
-                          margin: const EdgeInsets.all(16),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 12),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [
-                                Color.fromRGBO(53, 3, 90, 1),
-                                Color.fromRGBO(81, 9, 133, 1),
+                  child: Material(
+                    // Add Material widget to ensure proper rendering
+                    color: Colors.transparent,
+                    child: TweenAnimationBuilder(
+                      tween: Tween(begin: -100.0, end: 0.0),
+                      duration: const Duration(milliseconds: 500),
+                      builder: (context, double value, child) {
+                        return Transform.translate(
+                          offset: Offset(0, value),
+                          child: Container(
+                            margin: const EdgeInsets.all(16),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
                               ],
                             ),
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
+                            child: Text(
+                              challengeMessage ?? '',
+                              style: const TextStyle(
+                                color: Colors.black87,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
                               ),
-                            ],
-                          ),
-                          child: Text(
-                            challengeMessage ?? '',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
+                              textAlign: TextAlign.center,
                             ),
-                            textAlign: TextAlign.center,
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
-                ),
+                )
             ],
           );
         });
@@ -429,164 +381,146 @@ class _OpponentSearchScreenState extends State<OpponentSearchScreen>
   Future<void> _showSchedulePopup() async {
     DateTime? selectedDate;
     TimeOfDay? selectedTime;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: const Color.fromARGB(255, 102, 44, 144),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
       ),
       builder: (BuildContext context) {
-        return AnimatedBuilder(
-          animation: _gradientAnimationController,
-          builder: (context, child) {
-            return ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(25)),
-              child: CustomPaint(
-                painter: ComplexGradientPainter(
-                  animation: _gradientAnimation,
-                  rotationAnimation: _rotationAnimation,
-                  scaleAnimation: _scaleAnimation,
-                  colorAnimation1: _colorAnimation1,
-                  colorAnimation2: _colorAnimation2,
-                ),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius:
-                          const BorderRadius.vertical(top: Radius.circular(25)),
-                      color: Colors.black.withOpacity(0.1),
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Container(
+              decoration: BoxDecoration(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(25)),
+              ),
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                    20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Schedule Game',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
-                    child: Padding(
-                        padding: EdgeInsets.fromLTRB(20, 20, 20,
-                            MediaQuery.of(context).viewInsets.bottom + 20),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Text(
-                              'Schedule Game',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                shadows: [
-                                  Shadow(
-                                    blurRadius: 8.0,
-                                    color: Colors.black26,
-                                    offset: Offset(2.0, 2.0),
-                                  ),
-                                ],
-                              ),
+                    Container(
+                      margin: const EdgeInsets.symmetric(vertical: 15),
+                      height: 1,
+                      color: Colors.white24,
+                    ),
+                    ListTile(
+                      title: const Text(
+                        'Select Date',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            selectedDate != null
+                                ? DateFormat('EEE, MMM d, yyyy')
+                                    .format(selectedDate!)
+                                : 'Choose a date',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.7),
                             ),
-                            // Add a subtle shimmer effect to the divider
-                            Container(
-                              margin: const EdgeInsets.symmetric(vertical: 15),
-                              height: 1,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment(_gradientAnimation.value, 0),
-                                  end: Alignment(-_gradientAnimation.value, 0),
-                                  colors: const [
-                                    Colors.white24,
-                                    Colors.white,
-                                    Colors.white24,
-                                  ],
-                                ),
-                              ),
+                          ),
+                        ],
+                      ),
+                      trailing: Icon(
+                        Icons.calendar_today,
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                      onTap: () async {
+                        DateTime? pickedDate = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime(2101),
+                        );
+                        if (pickedDate != null) {
+                          setState(() {
+                            selectedDate = pickedDate;
+                          });
+                        }
+                      },
+                    ),
+                    ListTile(
+                      title: const Text(
+                        'Select Time',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            selectedTime != null
+                                ? selectedTime!.format(context)
+                                : 'Choose a time',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.7),
                             ),
-                            // Rest of your existing popup content
-                            ListTile(
-                              title: const Text(
-                                'Select Date',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              subtitle: Text(
-                                selectedDate != null
-                                    ? DateFormat('EEE, MMM d, yyyy')
-                                        .format(selectedDate!)
-                                    : 'Choose a date',
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.7),
-                                ),
-                              ),
-                              trailing: Icon(
-                                Icons.calendar_today,
-                                color: Colors.white.withOpacity(0.9),
-                              ),
-                              onTap: () async {
-                                DateTime? pickedDate = await showDatePicker(
-                                  context: context,
-                                  initialDate: DateTime.now(),
-                                  firstDate: DateTime.now(),
-                                  lastDate: DateTime(2101),
-                                );
-                                if (pickedDate != null) {
-                                  setState(() {
-                                    selectedDate = pickedDate;
-                                  });
-                                }
-                              },
+                          ),
+                        ],
+                      ),
+                      trailing: Icon(
+                        Icons.access_time,
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                      onTap: () async {
+                        TimeOfDay? pickedTime = await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay.now(),
+                        );
+                        if (pickedTime != null) {
+                          setState(() {
+                            selectedTime = pickedTime;
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (selectedDate != null && selectedTime != null) {
+                          setState(() {
+                            scheduledInfo =
+                                "Scheduled on ${DateFormat('EEE, MMM d, yyyy').format(selectedDate!)} at ${selectedTime!.format(context)}";
+                          });
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const EditableScheduledLeagueScreen(),
                             ),
-                            ListTile(
-                              title: const Text(
-                                'Select Time',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              subtitle: Text(
-                                selectedTime != null
-                                    ? selectedTime!.format(context)
-                                    : 'Choose a time',
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.7),
-                                ),
-                              ),
-                              trailing: Icon(
-                                Icons.access_time,
-                                color: Colors.white.withOpacity(0.9),
-                              ),
-                              onTap: () async {
-                                TimeOfDay? pickedTime = await showTimePicker(
-                                  context: context,
-                                  initialTime: TimeOfDay.now(),
-                                );
-                                if (pickedTime != null) {
-                                  setState(() {
-                                    selectedTime = pickedTime;
-                                  });
-                                }
-                              },
-                            ),
-                            const SizedBox(height: 20),
-                            CustomButton(
-                              onTap: () {
-                                if (selectedDate != null &&
-                                    selectedTime != null) {
-                                  setState(() {
-                                    scheduledInfo =
-                                        "Scheduled on ${DateFormat('EEE, MMM d, yyyy').format(selectedDate!)} at ${selectedTime!.format(context)}";
-                                  });
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          const ScheduledGameScreen(),
-                                    ),
-                                  );
-                                }
-                              },
-                              text: 'Schedule',
-                            ),
-                          ],
-                        )),
-                  ),
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.black,
+                        backgroundColor: Colors.white,
+                        minimumSize: Size(double.infinity, 48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text('Schedule'),
+                    ),
+                  ],
                 ),
               ),
             );
@@ -603,7 +537,6 @@ class _OpponentSearchScreenState extends State<OpponentSearchScreen>
       _opponentName = null;
       _showInitialIcons = false;
       _showAllChIcons = true;
-      _showOnlyCenterIcon = false;
       _opponentFound = false;
       _challengeAccepted = false;
     });
@@ -620,7 +553,6 @@ class _OpponentSearchScreenState extends State<OpponentSearchScreen>
       _timer?.cancel();
       _showInitialIcons = true;
       _showAllChIcons = false;
-      _showOnlyCenterIcon = false;
     });
     _rippleController.stop();
     _pulsateController.stop();
@@ -642,7 +574,6 @@ class _OpponentSearchScreenState extends State<OpponentSearchScreen>
         setState(() {
           _opponentName = "Rohit Sethi";
           _showAllChIcons = false;
-          _showOnlyCenterIcon = true;
           _opponentFound = true;
           _showInitialIcons = false;
           _isSearching = false;
@@ -657,221 +588,496 @@ class _OpponentSearchScreenState extends State<OpponentSearchScreen>
     setState(() {
       _challengeAccepted = true;
       _showInitialIcons = false;
-      _showOnlyCenterIcon = false;
       _showAllChIcons = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    String entryfee = widget.poolPrize;
     return Scaffold(
-      extendBodyBehindAppBar: true,
+      extendBodyBehindAppBar: false,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(
-          'LEAGUES',
-          style: TextStyle(color: Colors.white, fontSize: 20),
-        ),
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Colors.white,
-          ),
+          icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.of(context).pop();
           },
         ),
+        title: Text(
+          "LEAGUES",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: const Color.fromARGB(255, 102, 44, 144),
       ),
-      body: Stack(
-        children: [
-          Image.asset(
-            'lib/images/idkbg.jpg',
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-          ),
-          if (_isSearching && !_opponentFound)
-            AnimatedBuilder(
-              animation: _rippleController,
-              builder: (context, child) {
-                return CustomPaint(
-                  painter: RipplePainter(_rippleAnimations),
-                  child: Container(),
-                );
-              },
-            ),
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              // crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(
-                  height: 200,
-                ),
-                if (_challengeAccepted)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset('lib/images/mycard.png',
-                          width: 100, height: 200),
-                      const SizedBox(width: 20),
-                      _buildVsImage(),
-                      const SizedBox(width: 20),
-                      Image.asset('lib/images/oppcard.png',
-                          width: 100, height: 200),
-                    ],
-                  )
-                else if (_showOnlyCenterIcon && _opponentFound)
-                  Image.asset('lib/images/oppcard.png', width: 100, height: 200)
-                else if (_showAllChIcons)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset('lib/images/card.png',
-                          width: 100, height: 200),
-                      const SizedBox(width: 20),
-                      _buildVsImage(),
-                      const SizedBox(width: 20),
-                      FadeTransition(
-                        opacity: _flickerController,
-                        child: Image.asset('lib/images/bluecard.png',
-                            width: 100, height: 200),
-                      )
-                    ],
-                  )
-                else if (_showInitialIcons && !_opponentFound)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset('lib/images/mycard.png',
-                          width: 100, height: 200),
-                      const SizedBox(width: 30),
-                      _buildVsImage(),
-                      const SizedBox(width: 30),
-                      Image.asset('lib/images/bluecard.png',
-                          width: 100, height: 200),
-                    ],
-                  ),
-                const SizedBox(height: 20),
-
-                // Status and button logic
-                if (_isSearching && _opponentName == null) ...[
-                  const Text(
-                    'Matchmaking',
-                    style: TextStyle(color: Colors.orange, fontSize: 24),
-                  ),
-                  const SizedBox(height: 30),
-                  Text(
-                    '$_remainingTime',
-                    style: const TextStyle(color: Colors.white, fontSize: 36),
-                  ),
-                  const SizedBox(height: 20),
-                  CustomButton(
-                    onTap: _stopSearch,
-                    text: 'Cancel',
-                  ),
-                ] else if (_opponentName != null && !_challengeAccepted) ...[
-                  const Text(
-                    'Challenger Found',
-                    style: TextStyle(color: Colors.orange, fontSize: 24),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    _opponentName!,
-                    style: const TextStyle(color: Colors.white, fontSize: 24),
-                  ),
-                  const SizedBox(height: 30),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CustomButton(
-                        onTap: _acceptChallenge,
-                        text: 'Challenge',
-                      ),
-                      const SizedBox(width: 20),
-                      CustomButton(
-                        onTap: _startSearch,
-                        text: 'New?',
-                      ),
-                    ],
-                  ),
-                ] else if (_challengeAccepted) ...[
-                  Column(
-                    children: [
-                      Text(
-                        'Your Challenger',
-                        style:
-                            const TextStyle(color: Colors.orange, fontSize: 24),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Text(
-                        _opponentName!,
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 24),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 50),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CustomButton(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const LeaguePublishedScreen(),
-                            ),
-                          );
-                        },
-                        text: 'Publish',
-                      ),
-                      const SizedBox(width: 50),
-                      CustomButton(
-                        onTap: () {
-                          _showSchedulePopup();
-                        },
-                        text: 'Schedule',
-                      ),
-                    ],
-                  ),
-                ] else if (_showInitialIcons && !_opponentFound) ...[
-                  Column(
-                    children: [
-                      const Text(
-                        'Find Challenger',
-                        style: TextStyle(color: Colors.orange, fontSize: 24),
-                      ),
-                    ],
-                  ),
+      body: Container(
+        color: Colors.white,
+        child: Stack(
+          children: [
+            if (_isSearching && !_opponentFound)
+              AnimatedBuilder(
+                animation: _rippleController,
+                builder: (context, child) {
+                  return CustomPaint(
+                    painter: RipplePainter(_rippleAnimations),
+                    child: Container(),
+                  );
+                },
+              ),
+            Center(
+              child: Column(
+                // mainAxisAlignment: MainAxisAlignment.center,
+                // crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
                   const SizedBox(
-                    height: 50,
+                    height: 32,
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const SizedBox(
-                        height: 50,
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Container(
+                      height: 104,
+                      width: 280,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(
+                          color: const Color.fromRGBO(255, 146, 29, 1),
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      CustomButton(
-                        onTap: _startSearch,
-                        text: 'Random',
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 5),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Column(
+                            children: [
+                              Image.asset(
+                                'lib/images/ludo.png',
+                                height: 90,
+                                width: 60,
+                                fit: BoxFit.contain,
+                              ),
+                            ],
+                          ),
+                          // const SizedBox(width: 16),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              // mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'LUDO',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color.fromRGBO(255, 146, 29, 1),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                // SizedBox(height: 5),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'DEFAULT THEME',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                        color: Color.fromRGBO(255, 146, 29, 1),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 5),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        // Add your onTap functionality here
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 6,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: const Color.fromRGBO(
+                                              255, 146, 29, 1),
+                                          borderRadius:
+                                              BorderRadius.circular(4),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            const Text(
+                                              'Entry Fee',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              '₹${widget.poolPrize.toString()}', // Convert int to String
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 20),
-                      CustomButton(
-                        onTap: _showAvailableOpponentsPopup,
-                        text: 'Available',
-                      ),
-                    ],
+                    ),
                   ),
+
+                  if (_challengeAccepted)
+                    Column(
+                      children: [
+                        OpponentStatusContainer2(
+                          text: 'YOUR\nCHALLENGER',
+                        ),
+                        const SizedBox(height: 30),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Image.asset('lib/images/mycard.png',
+                                width: 100, height: 275, fit: BoxFit.fill),
+                            const SizedBox(width: 20),
+                            _buildVsImage(),
+                            const SizedBox(width: 20),
+                            Image.asset('lib/images/oppcard.png',
+                                width: 100, height: 275, fit: BoxFit.fill),
+                          ],
+                        ),
+                      ],
+                    )
+                  else if (_opponentFound)
+                    Column(
+                      children: [
+                        OpponentStatusContainer2(
+                          text: 'FOUND YOUR\nCHALLENGER',
+                        ),
+                        const SizedBox(height: 30),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Image.asset('lib/images/oppcard.png',
+                                width: 100, height: 275, fit: BoxFit.fill),
+                          ],
+                        ),
+                      ],
+                    )
+                  //Finding Challenger
+                  else if (_showAllChIcons)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 40.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          OpponentStatusContainer2(
+                            text: 'FINDING YOUR\nCHALLENGER......',
+                          ),
+                          const SizedBox(height: 30),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                width: 100,
+                                height: 300,
+                                child: Image.asset(
+                                  'lib/images/mycard.png',
+                                  fit: BoxFit.fill,
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                ),
+                              ),
+                              const SizedBox(width: 30),
+                              _buildVsImage(),
+                              const SizedBox(width: 30),
+                              Container(
+                                  width: 100,
+                                  height: 300,
+                                  child: FadeTransition(
+                                    opacity: _flickerController,
+                                    child: Image.asset(
+                                        'lib/images/bluecard.png',
+                                        fit: BoxFit.fill),
+                                  )),
+                            ],
+                          ),
+                        ],
+                      ),
+                    )
+
+                  // FIND Challenger
+                  else if (_showInitialIcons && !_opponentFound)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 30.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          OpponentStatusContainer2(
+                            text: 'FIND YOUR\nCHALLENGER',
+                          ),
+                          const SizedBox(height: 30),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                width: 100,
+                                height: 300,
+                                child: Image.asset(
+                                  'lib/images/mycard.png',
+                                  fit: BoxFit.fill,
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                ),
+                              ),
+                              const SizedBox(width: 30),
+                              _buildVsImage(),
+                              const SizedBox(width: 30),
+                              Container(
+                                width: 100,
+                                height: 300,
+                                child: Image.asset(
+                                  'lib/images/bluecard.png',
+                                  fit: BoxFit.fill,
+                                  // width: double.infinity,
+                                  // Sheight: double.infinity,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  const SizedBox(height: 20),
+
+                  // Status and button logic
+                  if (_isSearching && _opponentName == null) ...[
+                    Container(
+                      padding: EdgeInsets.all(16),
+                      width: double.infinity,
+                      height: 180,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('lib/images/union.png'),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            'MATCHMAKING',
+                            style: GoogleFonts.russoOne(
+                              textStyle: TextStyle(
+                                fontSize: 14,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            '$_remainingTime',
+                            style: const TextStyle(
+                                color: Colors.orange, fontSize: 36),
+                          ),
+                          const SizedBox(height: 8),
+                          CustomButton(
+                            onTap: _stopSearch,
+                            text: 'Cancel',
+                          ),
+                        ],
+                      ),
+                    )
+                  ] else if (_opponentName != null && !_challengeAccepted) ...[
+                    Container(
+                      padding:
+                          EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                      width: double.infinity,
+                      // padding: EdgeInsets.all(16),
+                      height: 280,
+                      // height: double.infinity,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('lib/images/union.png'),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        // crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Challenger Found',
+                            style: GoogleFonts.russoOne(
+                              textStyle: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            _opponentName!,
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 18),
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CustomButton(
+                                onTap: _acceptChallenge,
+                                text: 'Challenge',
+                              ),
+                              const SizedBox(width: 20),
+                              CustomButton(
+                                onTap: _startSearch,
+                                text: 'New?',
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    )
+                  ] else if (_challengeAccepted) ...[
+                    Container(
+                      padding: EdgeInsets.all(24),
+                      width: double.infinity,
+                      // padding: EdgeInsets.all(16),
+                      height: 280,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('lib/images/union.png'),
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      child: Column(
+                        // mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(
+                            height: 53,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'League Hosted',
+                                style: GoogleFonts.russoOne(
+                                  textStyle: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 40,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CustomButton(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          const LeaguePublishedScreen(),
+                                    ),
+                                  );
+                                },
+                                text: 'Publish',
+                              ),
+                              const SizedBox(width: 50),
+                              CustomButton(
+                                onTap: () {
+                                  _showSchedulePopup();
+                                },
+                                text: 'Schedule',
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ] else if (_showInitialIcons && !_opponentFound) ...[
+                    Container(
+                      padding: EdgeInsets.only(top: 20, bottom: 20),
+                      width: double.infinity,
+                      height: 180,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('lib/images/union.png'),
+                          fit: BoxFit.fill,
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Choose a type of  Challenger',
+                                style: GoogleFonts.russoOne(
+                                  textStyle: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 25,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const SizedBox(
+                                height: 50,
+                              ),
+                              CustomButton(
+                                onTap: _startSearch,
+                                text: 'Random',
+                              ),
+                              const SizedBox(width: 20),
+                              CustomButton(
+                                onTap: _showAvailableOpponentsPopup,
+                                text: 'Available',
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

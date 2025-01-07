@@ -1,29 +1,38 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class LeaderboardPage extends StatefulWidget {
   const LeaderboardPage({super.key});
 
   @override
-  _LeaderboardPageState createState() => _LeaderboardPageState();
+  State<LeaderboardPage> createState() => _LeaderboardPageState();
 }
 
 class _LeaderboardPageState extends State<LeaderboardPage>
     with SingleTickerProviderStateMixin {
   int _currentCategoryIndex = 1;
-  int _currentPlanIndex = 0;
   final List<String> _categories = ["POPULAR", "REVENUE", "POINTS"];
-  final List<String> _plans = ["Standard", "Pro", "Elite"];
+
+  // Animation controller for swipe effect
   late AnimationController _animationController;
-  bool _isAnimating = false;
+  late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
     super.initState();
+    // Initialize animation controller
     _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
       vsync: this,
-      duration: const Duration(milliseconds: 500),
     );
+
+    // Create a scale animation for wobble effect
+    _scaleAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.1), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 1.1, end: 1.0), weight: 1),
+    ]).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
   }
 
   @override
@@ -32,381 +41,320 @@ class _LeaderboardPageState extends State<LeaderboardPage>
     super.dispose();
   }
 
-  List<Map<String, dynamic>> fetchData(String category, String plan) {
+  // Method to change category with animation
+  void _changeCategory(int direction) {
+    setState(() {
+      // Update category index with wrap-around logic
+      _currentCategoryIndex =
+          (_currentCategoryIndex + direction + _categories.length) %
+              _categories.length;
+    });
+
+    // Trigger animation
+    _animationController.forward(from: 0.0);
+  }
+
+  List<Map<String, dynamic>> fetchData(String category) {
     List<Map<String, dynamic>> data = [];
-    for (int i = 1; i <= 60; i++) {
+    for (int i = 4; i <= 60; i++) {
       data.add({
-        'rank': i,
+        'rank': i.toString(),
         'name': i == 29 ? 'You' : 'User ${i + 100}',
-        'value': _getValueForCategory(category, i, plan),
+        'image': 'lib/images/k.jpeg', // Replace with appropriate image logic
+        'point': _getPointForCategory(category, i),
       });
     }
     return data;
   }
 
-  String _getValueForCategory(String category, int rank, String plan) {
-    int multiplier = _plans.indexOf(plan) + 1;
+  int _getPointForCategory(String category, int rank) {
     switch (category) {
       case 'POPULAR':
-        return '${(600 - rank * 10) * multiplier}k+';
+        return (600 - rank * 10);
       case 'REVENUE':
-        return '₹${(100000 - rank * 1000) * multiplier}';
+        return (100000 - rank * 1000);
       case 'POINTS':
-        return '${(1000 - rank * 15) * multiplier}';
+        return (1000 - rank * 15);
       default:
-        return '';
+        return 0;
     }
-  }
-
-  List<Map<String, dynamic>> getCurrentData() {
-    return fetchData(
-        _categories[_currentCategoryIndex], _plans[_currentPlanIndex]);
-  }
-
-  Future<void> _onSwipe(DragEndDetails details) async {
-    if (_isAnimating) return;
-
-    int newIndex;
-    if (details.primaryVelocity! > 0) {
-      // Swiped right
-      newIndex =
-          (_currentCategoryIndex - 1 + _categories.length) % _categories.length;
-    } else {
-      // Swiped left
-      newIndex = (_currentCategoryIndex + 1) % _categories.length;
-    }
-
-    // Haptic feedback
-    await HapticFeedback.mediumImpact();
-
-    setState(() {
-      _isAnimating = true;
-      _currentCategoryIndex = newIndex;
-    });
-
-    await _animationController.forward(from: 0.0);
-    setState(() {
-      _isAnimating = false;
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
+    // Get screen dimensions
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
         ),
-        centerTitle: true,
-        title: Image.asset(
-          'lib/images/aag_white.png',
-          height: screenSize.height * 0.04,
+        title: Text(
+          "LEADERBOARD",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        backgroundColor: const Color.fromARGB(255, 102, 44, 144),
       ),
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: Image.asset(
-              'lib/images/idkbg.jpg',
-              fit: BoxFit.cover,
-            ),
-          ),
-          SafeArea(
-            child: Column(
-              children: [
-                // Title Row with Icon
-                Padding(
-                  padding: EdgeInsets.all(screenSize.height * 0.02),
-                  child: Row(
-                    children: [
-                      Image.asset(
-                        'lib/images/ic4.png',
-                        width: screenSize.width * 0.06,
-                        height: screenSize.width * 0.06,
-                      ),
-                      const SizedBox(width: 10),
-                      const Text(
-                        'LEADERBOARD',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
+      body: GestureDetector(
+        // Add swipe gesture detection
+        onHorizontalDragEnd: (details) {
+          // Detect swipe direction
+          if (details.primaryVelocity! > 0) {
+            // Swipe right - previous category
+            _changeCategory(-1);
+          } else if (details.primaryVelocity! < 0) {
+            // Swipe left - next category
+            _changeCategory(1);
+          }
+        },
+        child: Container(
+          width: screenWidth,
+          height: screenHeight,
+          color: Colors.black87, // Match AppBar background
+          child: Stack(
+            children: [
+              // Background Image
+              Positioned(
+                top: -35,
+                left: 0,
+                right: 0,
+                child: Image.asset(
+                  "lib/images/po.png",
+                  width: screenWidth,
+                  fit: BoxFit.contain,
                 ),
+              ),
 
-                // Dynamic Spacing
-                SizedBox(height: screenSize.height * 0.03),
-
-                // Categories Row with GestureDetector for swipe
-                GestureDetector(
-                  onHorizontalDragEnd: _onSwipe,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        for (int i = 0; i < _categories.length; i++)
-                          _leaderboardTab(
-                              _categories[i], _currentCategoryIndex == i),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Dynamic Spacing
-                SizedBox(height: screenSize.height * 0.03),
-
-                // Plans Row
-                Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      for (int i = 0; i < _plans.length; i++)
-                        _planTab(_plans[i], _currentPlanIndex == i),
-                    ],
-                  ),
-                ),
-
-                // Dynamic Spacing
-                SizedBox(height: screenSize.height * 0.02),
-
-                // Leaderboard Content
-                Expanded(
+              // Category Selector (Responsive Positioning)
+              Positioned(
+                top: screenHeight * 0.05, // Adjusted for AppBar
+                left: 0,
+                right: 0,
+                child: Center(
                   child: Container(
-                    decoration: BoxDecoration(
-                      color:
-                          const Color.fromARGB(120, 0, 0, 0).withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 500),
-                      transitionBuilder:
-                          (Widget child, Animation<double> animation) {
-                        return FadeTransition(
-                          opacity: animation,
-                          child: SlideTransition(
-                            position: animation.drive(Tween<Offset>(
-                              begin: const Offset(0.0, 0.3),
-                              end: Offset.zero,
-                            ).chain(CurveTween(curve: Curves.easeOut))),
-                            child: child,
+                    width: screenWidth * 0.9,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: _categories.map((category) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _currentCategoryIndex =
+                                    _categories.indexOf(category);
+                              });
+                            },
+                            child: Text(
+                              category,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: _currentCategoryIndex ==
+                                        _categories.indexOf(category)
+                                    ? Colors.white
+                                    : Colors.black38,
+                              ),
+                            ),
                           ),
                         );
-                      },
-                      child: _buildLeaderboardContent(getCurrentData()),
+                      }).toList(),
                     ),
                   ),
                 ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+              ),
 
-  Widget _buildLeaderboardContent(List<Map<String, dynamic>> data) {
-    return ListView.builder(
-      key: ValueKey<String>(
-          "${_categories[_currentCategoryIndex]}_${_plans[_currentPlanIndex]}"),
-      itemCount: data.length,
-      itemBuilder: (context, index) {
-        final item = data[index];
-        return _buildLeaderboardItem(
-          item['rank'],
-          item['name'],
-          item['value'],
-          item['rank'] <= 3,
-        );
-      },
-    );
-  }
+              // Top 3 Ranks (Responsive Positioning)
+              Positioned(
+                top: screenHeight * 0.15, // Adjusted relative positioning
+                left: 0,
+                right: 0,
+                child: AnimatedBuilder(
+                  animation: _scaleAnimation,
+                  builder: (context, child) {
+                    return Transform.scale(
+                      scale: _scaleAnimation.value,
+                      child: Container(
+                        width: screenWidth,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            // Second Place (Left)
+                            _buildTopRank(
+                              radius: 20.0,
+                              height: 2,
+                              image: "lib/images/k.jpeg",
+                              name: "Hodges",
+                              point: "12323",
+                            ),
 
-  Widget _leaderboardTab(String text, bool isActive) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeInOut,
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      decoration: BoxDecoration(
-        color: isActive ? Colors.orange : Colors.transparent,
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: AnimatedDefaultTextStyle(
-        duration: const Duration(milliseconds: 500),
-        style: TextStyle(
-          color: isActive ? Colors.white : Colors.white.withOpacity(0.7),
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-        ),
-        child: Text(text),
-      ),
-    );
-  }
+                            // First Place (Middle, Larger)
+                            _buildTopRank(
+                              radius: 25.0,
+                              height: 2,
+                              image: "lib/images/g.jpeg",
+                              name: "Johnny Rios",
+                              point: "23131",
+                            ),
+                            // Third Place (Right)
+                            _buildTopRank(
+                              radius: 20.0,
+                              height: 2,
+                              image: "lib/images/j.jpeg",
+                              name: "loram",
+                              point: "6343",
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
 
-  Widget _planTab(String text, bool isActive) {
-    return GestureDetector(
-      onTap: () async {
-        if (_currentPlanIndex != _plans.indexOf(text) && !_isAnimating) {
-          await HapticFeedback.selectionClick();
-          setState(() {
-            _currentPlanIndex = _plans.indexOf(text);
-          });
-        }
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(
-              color: isActive ? Colors.orange : Colors.transparent,
-              width: 5,
-            ),
-          ),
-        ),
-        child: Text(
-          text,
-          style: TextStyle(
-            color: isActive ? Colors.orange : Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLeaderboardItem(
-      int rank, String name, String value, bool isTopThree) {
-    List<List<Color>> gradients = [
-      [
-        const Color.fromARGB(255, 245, 187, 41),
-        const Color.fromARGB(255, 109, 101, 27)
-      ], // Gold
-      [Colors.grey[900]!, Colors.grey[600]!], // Silver
-      [Colors.brown[800]!, Colors.brown[300]!], // Bronze
-    ];
-
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isTopThree
-              ? gradients[rank - 1]
-              : name == 'You'
-                  ? [
-                      const Color.fromARGB(255, 237, 55, 173),
-                      const Color.fromARGB(255, 245, 153, 33)
-                    ]
-                  : [
-                      const Color.fromRGBO(101, 47, 157, 1),
-                      const Color.fromRGBO(57, 47, 146, 1)
-                    ],
-        ),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-        child: Row(
-          children: [
-            if (isTopThree) _buildMedal(rank),
-            if (!isTopThree) ...[
-              const SizedBox(width: 2),
-              Image.asset(
-                'lib/images/rank.png',
-                height: 40,
-                width: 40,
+              // Leaderboard List
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  height: screenHeight * 0.55, // Adjusted to leave more space
+                  width: screenWidth,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(20),
+                      topLeft: Radius.circular(20),
+                    ),
+                  ),
+                  child: ListView.builder(
+                      shrinkWrap: true,
+                      physics: const BouncingScrollPhysics(),
+                      itemCount:
+                          fetchData(_categories[_currentCategoryIndex]).length,
+                      itemBuilder: (context, index) {
+                        final items = fetchData(
+                            _categories[_currentCategoryIndex])[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(
+                              top: 20, right: 20, left: 20, bottom: 15),
+                          child: Row(
+                            children: [
+                              Text(
+                                items['rank'],
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(width: 15),
+                              CircleAvatar(
+                                radius: 25,
+                                backgroundImage: AssetImage(items['image']),
+                              ),
+                              const SizedBox(width: 15),
+                              Text(
+                                items['name'],
+                                style: const TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const Spacer(),
+                              Container(
+                                height: 25,
+                                width: 70,
+                                decoration: BoxDecoration(
+                                    color: Colors.black12,
+                                    borderRadius: BorderRadius.circular(50)),
+                                child: Row(
+                                  children: [
+                                    const SizedBox(width: 5),
+                                    const RotatedBox(
+                                      quarterTurns: 1,
+                                      child: Icon(
+                                        Icons.back_hand,
+                                        color: Color.fromARGB(255, 255, 187, 0),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      items['point'].toString(),
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 10,
+                                          color: Colors.black),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
+                        );
+                      }),
+                ),
               ),
             ],
-            const SizedBox(width: 10),
-            Text(
-              "#$rank",
-              style: const TextStyle(color: Colors.white70, fontSize: 14),
-            ),
-            const SizedBox(width: 10),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(25),
-              child: Image.asset(
-                'lib/images/ch.png',
-                height: 50,
-                width: 50,
-              ),
-            ),
-            const SizedBox(width: 15),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  _getCategoryLabel(),
-                  style: const TextStyle(color: Colors.white70, fontSize: 12),
-                ),
-                Text(
-                  value,
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildMedal(int rank) {
-    final medalImages = [
-      'lib/images/gold.png',
-      'lib/images/silver.png',
-      'lib/images/bronze.png'
-    ];
-    return SizedBox(
-      width: 40,
-      height: 40,
-      child: Center(
-        child: Image.asset(
-          medalImages[rank - 1],
-          width: 40,
-          height: 40,
+  Column _buildTopRank({
+    required double radius,
+    required double height,
+    required String image,
+    required String name,
+    required String point,
+  }) {
+    return Column(
+      children: [
+        CircleAvatar(
+          radius: radius,
+          backgroundImage: AssetImage(image),
         ),
-      ),
+        SizedBox(
+          height: height,
+        ),
+        Text(
+          name,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+        SizedBox(
+          height: height,
+        ),
+        Container(
+          height: 25,
+          width: 70,
+          decoration: BoxDecoration(
+              color: Colors.black54, borderRadius: BorderRadius.circular(50)),
+          child: Row(
+            children: [
+              const SizedBox(
+                width: 5,
+              ),
+              const Icon(
+                Icons.back_hand,
+                color: Color.fromARGB(255, 255, 187, 0),
+              ),
+              const SizedBox(
+                width: 5,
+              ),
+              Text(
+                point,
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 10,
+                    color: Colors.white),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
-  }
-
-  String _getCategoryLabel() {
-    switch (_categories[_currentCategoryIndex]) {
-      case 'POPULAR':
-        return 'FOLLOWERS';
-      case 'REVENUE':
-        return 'REVENUE';
-      case 'POINTS':
-        return 'POINTS';
-      default:
-        return '';
-    }
   }
 }

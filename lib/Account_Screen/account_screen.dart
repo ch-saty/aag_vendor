@@ -1,7 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'dart:async';
-import 'dart:math';
+// import 'dart:math';
 
 import 'package:flutter/material.dart';
 
@@ -52,10 +52,10 @@ class AccountScreen extends StatelessWidget {
                 ),
               ),
               child: Container(
-                width: MediaQuery.of(context).size.width * 0.85,
+                width: MediaQuery.of(context).size.width * 0.90,
                 height: MediaQuery.of(context).size.height * 0.30,
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     _buildSettingsItem(
                       'Profile',
@@ -70,7 +70,7 @@ class AccountScreen extends StatelessWidget {
                     _buildSettingsItem(
                       'Pause Account',
                       'lib/images/pause_icon.png',
-                      () => _showpauseAccountPopup(context),
+                      () => _showPauseAccountBottomSheet(context),
                     ),
                     _buildSettingsItem(
                       'Logout',
@@ -88,149 +88,212 @@ class AccountScreen extends StatelessWidget {
     );
   }
 
-  void _showpauseAccountPopup(BuildContext context) {
-    showDialog(
+  void _showPauseAccountBottomSheet(BuildContext context) {
+    showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      enableDrag: true,
       builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: _PauseAccountPopup(),
-        );
+        return _PauseAccountSheet();
       },
     );
   }
 
   void _showLogoutPopup(BuildContext context) {
-    showDialog(
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 360;
+
+    showModalBottomSheet(
       context: context,
-      barrierDismissible: false,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      enableDrag: true,
       builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.0),
-          ),
-          backgroundColor: Colors.transparent,
-          child: Container(
-            padding: const EdgeInsets.all(20.0),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20.0),
-              gradient: const LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [
-                  Color(0xFF35035A),
-                  Color(0xFF510985),
-                  Color(0xFF35035A),
-                ],
-                stops: [0.1572, 0.50, 0.8753],
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // Main Bottom Sheet
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              height: MediaQuery.of(context).size.height * 0.4,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [
+                    Color(0xFF35035A),
+                    Color(0xFF510985),
+                    Color(0xFF35035A),
+                  ],
+                  stops: [0.1572, 0.5, 0.8753],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
               ),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'LOG OUT',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
+              child: Column(
+                children: [
+                  // Header
+                  Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: [
+                          Color(0xFF83410A),
+                          Color(0xFFE97411),
+                          Color(0xFF88440A),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(20),
+                        topRight: Radius.circular(20),
                       ),
                     ),
-                    GestureDetector(
-                      onTap: () => Navigator.of(context).pop(),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        child: const Icon(
-                          Icons.close,
-                          color: Colors.white,
-                          size: 24,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // IconButton(
+                          //   icon: const Icon(Icons.arrow_back,
+                          //       color: Colors.white),
+                          //   onPressed: () => Navigator.pop(context),
+                          // ),
+                          const Text(
+                            'LOG OUT',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: screenSize.height * 0.04),
+
+                  // Logout Options
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isSmallScreen ? 12 : 16,
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text(
+                              'Any drafts you\'ve saved will still be\navailable on this device.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(height: 30),
+                            Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Color(0xFF83410A),
+                                    Color(0xFFE97411),
+                                    Color(0xFF88440A)
+                                  ],
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  // Add your logout logic here
+                                  Navigator.of(context).pop();
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.transparent,
+                                  foregroundColor: Colors.white,
+                                  elevation: 0,
+                                  shadowColor: Colors.transparent,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Log out',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 15),
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              style: TextButton.styleFrom(
+                                foregroundColor: const Color(0xFFE97411),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  side: const BorderSide(
+                                    color: Color(0xFFE97411),
+                                    width: 1,
+                                  ),
+                                ),
+                              ),
+                              child: const Text(
+                                'Cancel',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 50),
-                const Text(
-                  'Any drafts you\'ve saved will still be\navailable on this device.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
                   ),
-                ),
-                const SizedBox(height: 30),
-                Container(
-                  width: 100,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    gradient: const LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Color(0xFF83410A),
-                        Color(0xFFE97411),
-                        Color(0xFF88440A),
-                      ],
-                      stops: [0.071, 0.491, 0.951],
-                    ),
-                  ),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // Add your logout logic here
-                      Navigator.of(context).pop();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text(
-                      'Log out',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 15),
-                Container(
-                  width: 100,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: const Color.fromRGBO(233, 116, 17, 1),
-                      width: 1,
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: TextButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
+
+            // Floating Close Button
+            Positioned(
+              top: -50,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle, // Makes the container circular
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xFF712FA0),
+                          Color(0xFF362F91),
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         );
       },
     );
@@ -241,129 +304,214 @@ class AccountScreen extends StatelessWidget {
     final TextEditingController passwordController = TextEditingController();
     final TextEditingController emailController = TextEditingController();
     final TextEditingController phoneController = TextEditingController();
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 360;
 
     nameController.text = 'Satyam ';
     passwordController.text = 'satyam@aag';
     emailController.text = 'satyams@gmail.com';
     phoneController.text = '8888888888';
-    showDialog(
+
+    showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      enableDrag: true,
       builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [
-                  Color(0xFF35035A),
-                  Color(0xFF510985),
-                  Color(0xFF35035A),
-                ],
-                stops: [0.1572, 0.50, 0.8753],
-              ),
-            ),
-            padding: EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'PROFILE',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // Main Bottom Sheet
+            StatefulBuilder(
+              builder: (context, setState) {
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  height: MediaQuery.of(context).size.height * 0.8,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [
+                        Color(0xFF35035A),
+                        Color(0xFF510985),
+                        Color(0xFF35035A),
+                      ],
+                      stops: [0.1572, 0.50, 0.8753],
                     ),
-                    IconButton(
-                      icon: Icon(Icons.close, color: Colors.white),
-                      onPressed: () => Navigator.pop(context),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
                     ),
-                  ],
-                ),
-                SizedBox(height: 20),
-                Stack(
-                  alignment: Alignment.bottomRight,
-                  children: [
-                    CircleAvatar(
-                      radius: 40,
-                      backgroundImage: AssetImage('lib/images/ch.png'),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.edit,
-                        size: 16,
-                        color: Color(0xFF510985),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 20),
-                _buildEditableField('Name', nameController),
-                PasswordTextField(
-                  label: 'Password',
-                  controller: passwordController,
-                  isPassword: true,
-                ),
-                _buildEditableField('Email Id', emailController),
-                _buildEditableField('Phone Number', phoneController,
-                    keyboardType: TextInputType.phone),
-                SizedBox(height: 20),
-                StatefulBuilder(
-                  builder: (context, setState) {
-                    return InkWell(
-                      onTap: () {
-                        // Handle save profile logic here
-                        print('Name: ${nameController.text}');
-                        print('Password: ${passwordController.text}');
-                        print('Email: ${emailController.text}');
-                        print('Phone: ${phoneController.text}');
-                        Navigator.pop(context);
-                      },
-                      child: Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    children: [
+                      // Header
+                      Container(
+                        decoration: const BoxDecoration(
                           gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
                             colors: [
                               Color(0xFF83410A),
                               Color(0xFFE97411),
                               Color(0xFF88440A),
                             ],
-                            stops: [0.071, 0.491, 0.951],
+                          ),
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(20),
+                            topRight: Radius.circular(20),
                           ),
                         ),
-                        child: Text(
-                          'EDIT PROFILE',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // IconButton(
+                              //   icon: const Icon(Icons.arrow_back,
+                              //       color: Colors.white),
+                              //   onPressed: () => Navigator.pop(context),
+                              // ),
+                              const Text(
+                                'PROFILE',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                    );
-                  },
-                ),
-              ],
+
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: isSmallScreen ? 12 : 20,
+                              vertical: isSmallScreen ? 12 : 20,
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Stack(
+                                  alignment: Alignment.bottomRight,
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 40,
+                                      backgroundImage:
+                                          AssetImage('lib/images/ch.png'),
+                                    ),
+                                    Container(
+                                      padding: EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.edit,
+                                        size: 16,
+                                        color: Color(0xFF510985),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 20),
+                                _buildEditableField('Name', nameController),
+                                PasswordTextField(
+                                  label: 'Password',
+                                  controller: passwordController,
+                                  isPassword: true,
+                                ),
+                                _buildEditableField(
+                                    'Email Id', emailController),
+                                _buildEditableField(
+                                  'Phone Number',
+                                  phoneController,
+                                  keyboardType: TextInputType.phone,
+                                ),
+                                SizedBox(height: 20),
+                                InkWell(
+                                  onTap: () {
+                                    // Handle save profile logic here
+                                    print('Name: ${nameController.text}');
+                                    print(
+                                        'Password: ${passwordController.text}');
+                                    print('Email: ${emailController.text}');
+                                    print('Phone: ${phoneController.text}');
+                                    Navigator.pop(context);
+                                  },
+                                  child: Container(
+                                    width: double.infinity,
+                                    padding: EdgeInsets.symmetric(vertical: 12),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      gradient: const LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          Color(0xFF83410A),
+                                          Color(0xFFE97411),
+                                          Color(0xFF88440A),
+                                        ],
+                                        stops: [0.071, 0.491, 0.951],
+                                      ),
+                                    ),
+                                    child: Text(
+                                      'EDIT PROFILE',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
-          ),
+
+            // Floating Close Button
+            Positioned(
+              top: -50,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle, // Makes the container circular
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xFF712FA0),
+                          Color(0xFF362F91),
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         );
       },
     );
@@ -432,11 +580,11 @@ class AccountScreen extends StatelessWidget {
     VoidCallback onTap, {
     bool showDivider = true,
   }) {
-    return Column(
-      children: [
-        InkWell(
-          onTap: onTap,
-          child: Padding(
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
             child: Row(
               children: [
@@ -444,7 +592,6 @@ class AccountScreen extends StatelessWidget {
                   iconPath,
                   width: 24,
                   height: 24,
-                  color: Colors.white,
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -452,102 +599,190 @@ class AccountScreen extends StatelessWidget {
                     title,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 22,
+                      fontSize: 16, // Match font size to _buildSettingsItem2
                     ),
                   ),
                 ),
-                const Icon(
-                  Icons.chevron_right,
-                  color: Color.fromARGB(255, 233, 116, 17),
-                  size: 24,
+                Image.asset(
+                  'lib/images/r_arrow.png',
+                  width: 20,
+                  height: 20,
+                  color: const Color.fromRGBO(233, 116, 17, 1),
                 ),
               ],
             ),
           ),
-        ),
-        if (showDivider)
-          Container(
-            height: 0.5,
-            color: Colors.white.withOpacity(0.8),
-          ),
-      ],
+          // Horizontal divider
+          // if (showDivider)
+          //   Container(
+          //     height: 0.5,
+          //     color: const Color.fromARGB(255, 233, 116, 17),
+          //   ),
+        ],
+      ),
     );
   }
 
   void _showSecurityPopup(BuildContext context) {
-    showDialog(
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 360;
+
+    showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      enableDrag: true,
       builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.85,
-            height: MediaQuery.of(context).size.height * 0.5,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFF35035A),
-                  Color(0xFF510985),
-                  Color(0xFF35035A),
-                ],
-                stops: [0.1572, 0.5, 0.8753],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // Main Bottom Sheet
+            StatefulBuilder(
+              builder: (context, setState) {
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  height: MediaQuery.of(context).size.height * 0.6,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFF35035A),
+                        Color(0xFF510985),
+                        Color(0xFF35035A),
+                      ],
+                      stops: [0.1572, 0.5, 0.8753],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
+                  ),
+                  child: Column(
                     children: [
-                      Text(
-                        'SECURITY',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                      // Header
+                      Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
+                            colors: [
+                              Color(0xFF83410A),
+                              Color(0xFFE97411),
+                              Color(0xFF88440A),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(20),
+                            topRight: Radius.circular(20),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // IconButton(
+                              //   icon: const Icon(Icons.arrow_back,
+                              //       color: Colors.white),
+                              //   onPressed: () => Navigator.pop(context),
+                              // ),
+                              const Text(
+                                'SECURITY',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      IconButton(
-                        icon: Icon(Icons.close, color: Colors.white),
-                        onPressed: () => Navigator.pop(context),
+
+                      SizedBox(height: screenSize.height * 0.04),
+
+                      // Security Options List
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: isSmallScreen ? 12 : 16,
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                _buildSecurityOption(
+                                  context,
+                                  'Private Account',
+                                  'lib/images/private.png',
+                                  () => _showPrivateAccountPopup(context),
+                                ),
+                                SizedBox(height: isSmallScreen ? 16 : 20),
+                                _buildSecurityOption(
+                                  context,
+                                  '2-Step Verification',
+                                  'lib/images/2-step.png',
+                                  () => _show2StepVerificationPopup(context),
+                                ),
+                                SizedBox(height: isSmallScreen ? 16 : 20),
+                                _buildSecurityOption(
+                                  context,
+                                  'Log In Devices',
+                                  'lib/images/devices.png',
+                                  () => _showLogInDevicesPopup(context),
+                                ),
+                                SizedBox(height: isSmallScreen ? 16 : 20),
+                                _buildSecurityOption(
+                                  context,
+                                  'Change Password',
+                                  'lib/images/change_password.png',
+                                  () => _showChangePasswordPopup(context),
+                                ),
+                                SizedBox(height: isSmallScreen ? 16 : 20),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                ),
-                _buildSecurityOption(
-                  context,
-                  'Private Account',
-                  'lib/images/private.png',
-                  () => _showPrivateAccountPopup(context),
-                ),
-                _buildSecurityOption(
-                  context,
-                  '2-Step Verification',
-                  'lib/images/2-step.png',
-                  () => _show2StepVerificationPopup(context),
-                ),
-                _buildSecurityOption(
-                  context,
-                  'Log In Devices',
-                  'lib/images/devices.png',
-                  () => _showLogInDevicesPopup(context),
-                ),
-                _buildSecurityOption(
-                  context,
-                  'Change Password',
-                  'lib/images/change_password.png',
-                  () => _showChangePasswordPopup(context),
-                ),
-                SizedBox(height: 16),
-              ],
+                );
+              },
             ),
-          ),
+
+            // Floating Close Button
+            Positioned(
+              top: -50,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle, // Makes the container circular
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xFF712FA0),
+                          Color(0xFF362F91),
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         );
       },
     );
@@ -559,18 +794,7 @@ class AccountScreen extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment(0, -1),
-            end: Alignment(0, 1),
-            colors: [
-              Color.fromRGBO(113, 47, 160, 0.2), // Purple
-              Color.fromRGBO(54, 47, 145, .2), // Dark Blue
-            ],
-            stops: [0.0155, 0.9845], // Corresponds to 1.55% and 98.45%
-            transform: GradientRotation(178.17 * pi / 180), // 178.17 degrees
-          ),
-        ),
+        decoration: BoxDecoration(color: Colors.white10),
         child: Row(
           children: [
             Image.asset(
@@ -601,150 +825,807 @@ class AccountScreen extends StatelessWidget {
   }
 
   void _showPrivateAccountPopup(BuildContext context) {
-    bool isPrivate = false; // Add a state to track the switch value
+    bool isPrivate = false;
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 360;
 
-    showDialog(
+    showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      enableDrag: true,
       builder: (BuildContext context) {
-        return StatefulBuilder(
-          // Use StatefulBuilder to update the state within the dialog
-          builder: (BuildContext context, StateSetter setState) {
-            return Dialog(
-              backgroundColor: Colors.transparent,
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Color(0xFF35035A),
-                      Color(0xFF510985),
-                      Color(0xFF35035A),
-                    ],
-                    stops: [0.1572, 0.5, 0.8753],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // Main Bottom Sheet
+            StatefulBuilder(
+              builder: (context, setState) {
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  height: MediaQuery.of(context).size.height * 0.45,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFF35035A),
+                        Color(0xFF510985),
+                        Color(0xFF35035A),
+                      ],
+                      stops: [0.1572, 0.5, 0.8753],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
                   ),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'PRIVATE ACCOUNT',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
+                  child: Column(
+                    children: [
+                      // Header
+                      Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
+                            colors: [
+                              Color(0xFF83410A),
+                              Color(0xFFE97411),
+                              Color(0xFF88440A),
+                            ],
                           ),
-                          IconButton(
-                            icon: Icon(Icons.close, color: Colors.white),
-                            onPressed: () => Navigator.pop(context),
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(20),
+                            topRight: Radius.circular(20),
                           ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Private Account',
-                            style: TextStyle(
-                              color: Colors.orange,
-                              fontSize: 16,
-                            ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // IconButton(
+                              //   icon: const Icon(Icons.arrow_back,
+                              //       color: Colors.white),
+                              //   onPressed: () => Navigator.pop(context),
+                              // ),
+                              const Text(
+                                'PRIVATE ACCOUNT',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
-                          Switch(
-                            value: isPrivate,
-                            activeColor: Colors.green,
-                            inactiveThumbColor: Colors.red,
-                            inactiveTrackColor: Colors.red.withOpacity(0.5),
-                            onChanged: (bool value) {
-                              setState(() {
-                                isPrivate = value;
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: Text(
-                        'When your account is public, your profile and Publish Game can be seen by anyone, on or off AAG App, even if they don\'t have an AAG account',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
                         ),
                       ),
+
+                      SizedBox(height: screenSize.height * 0.04),
+
+                      // Content
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isSmallScreen ? 12 : 16,
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Private Account',
+                                  style: TextStyle(
+                                    color: Colors.orange,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                Switch(
+                                  value: isPrivate,
+                                  activeColor: Colors.green,
+                                  inactiveThumbColor: Colors.red,
+                                  inactiveTrackColor:
+                                      Colors.red.withOpacity(0.5),
+                                  onChanged: (bool value) {
+                                    setState(() {
+                                      isPrivate = value;
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 16),
+                            Text(
+                              'When your account is public, your profile and Publish Game can be seen by anyone, on or off AAG App, even if they don\'t have an AAG account',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+
+            // Floating Close Button
+            Positioned(
+              top: -50,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle, // Makes the container circular
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xFF712FA0),
+                          Color(0xFF362F91),
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
                     ),
-                    SizedBox(height: 16),
-                  ],
+                    child: const Icon(
+                      Icons.close_rounded,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
                 ),
               ),
-            );
-          },
+            ),
+          ],
         );
       },
     );
   }
 
-  void _showLogInDevicesPopup(BuildContext context) {
-    showDialog(
+  void _show2StepVerificationPopup(BuildContext context) {
+    List<TextEditingController> codeControllers = List.generate(
+      4,
+      (index) => TextEditingController(),
+    );
+    List<FocusNode> focusNodes = List.generate(
+      4,
+      (index) => FocusNode(),
+    );
+
+    int remainingTime = 30;
+    Timer? countdownTimer;
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 360;
+
+    showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      enableDrag: true,
       builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFF35035A),
-                  Color(0xFF510985),
-                  Color(0xFF35035A),
-                ],
-                stops: [0.1572, 0.5, 0.8753],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            StatefulBuilder(
+              builder: (context, setState) {
+                countdownTimer ??=
+                    Timer.periodic(Duration(seconds: 1), (timer) {
+                  setState(() {
+                    if (remainingTime > 0) {
+                      remainingTime--;
+                    } else {
+                      countdownTimer?.cancel();
+                    }
+                  });
+                });
+
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  height: MediaQuery.of(context).size.height * 0.6,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFF35035A),
+                        Color(0xFF510985),
+                        Color(0xFF35035A),
+                      ],
+                      stops: [0.1572, 0.5, 0.8753],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
+                  ),
+                  child: Column(
                     children: [
-                      Text(
-                        'LOG IN DEVICES',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                      Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
+                            colors: [
+                              Color(0xFF83410A),
+                              Color(0xFFE97411),
+                              Color(0xFF88440A),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(20),
+                            topRight: Radius.circular(20),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // IconButton(
+                              //   icon: const Icon(Icons.arrow_back,
+                              //       color: Colors.white),
+                              //   onPressed: () {
+                              //     countdownTimer?.cancel();
+                              //     Navigator.pop(context);
+                              //   },
+                              // ),
+                              const Text(
+                                '2-STEP VERIFICATION',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      IconButton(
-                        icon: Icon(Icons.close, color: Colors.white),
-                        onPressed: () => Navigator.pop(context),
+                      SizedBox(height: screenSize.height * 0.04),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: isSmallScreen ? 12 : 16,
+                            ),
+                            child: Column(
+                              children: [
+                                Text(
+                                  'Enter the 4-digit verification code we texted to your phone',
+                                  style: TextStyle(
+                                    color: Colors.orange,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                SizedBox(height: 24),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: List.generate(
+                                    4,
+                                    (index) => Container(
+                                      width: 50,
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                        color: Colors.transparent,
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: Colors.purple.shade300,
+                                          width: 2,
+                                        ),
+                                      ),
+                                      child: TextField(
+                                        controller: codeControllers[index],
+                                        focusNode: focusNodes[index],
+                                        textAlign: TextAlign.center,
+                                        keyboardType: TextInputType.number,
+                                        maxLength: 1,
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        decoration: InputDecoration(
+                                          counterText: "",
+                                          border: InputBorder.none,
+                                        ),
+                                        onChanged: (value) {
+                                          if (value.length == 1 && index < 3) {
+                                            focusNodes[index + 1]
+                                                .requestFocus();
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 24),
+                                Container(
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Color(0xFF712FA0),
+                                        Color(0xFF362F91),
+                                      ],
+                                      stops: [0.0155, 0.9845],
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      String code = codeControllers
+                                          .map((controller) => controller.text)
+                                          .join();
+                                      print('Submitted code: $code');
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.transparent,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 16),
+                                    ),
+                                    child: Text(
+                                      'Submit',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 16),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Re-send Code in ',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    Text(
+                                      '0:${remainingTime}s',
+                                      style: TextStyle(
+                                        color: Colors.orange,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                ),
-                _buildDeviceItem(context),
-                _buildDeviceItem(context),
-                SizedBox(height: 16),
-              ],
+                );
+              },
             ),
-          ),
+            Positioned(
+              top: -50,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: GestureDetector(
+                  onTap: () {
+                    countdownTimer?.cancel();
+                    Navigator.of(context).pop();
+                  },
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle, // Makes the container circular
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xFF712FA0),
+                          Color(0xFF362F91),
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    ).then((_) {
+      countdownTimer?.cancel();
+    });
+  }
+
+  void _showLogInDevicesPopup(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 360;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      enableDrag: true,
+      builder: (BuildContext context) {
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // Main Bottom Sheet
+            StatefulBuilder(
+              builder: (context, setState) {
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  height: MediaQuery.of(context).size.height * 0.5,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFF35035A),
+                        Color(0xFF510985),
+                        Color(0xFF35035A),
+                      ],
+                      stops: [0.1572, 0.5, 0.8753],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      // Header
+                      Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
+                            colors: [
+                              Color(0xFF83410A),
+                              Color(0xFFE97411),
+                              Color(0xFF88440A),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(20),
+                            topRight: Radius.circular(20),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // IconButton(
+                              //   icon: const Icon(Icons.arrow_back,
+                              //       color: Colors.white),
+                              //   onPressed: () => Navigator.pop(context),
+                              // ),
+                              const Text(
+                                'LOG IN DEVICES',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(height: screenSize.height * 0.04),
+
+                      // Devices List
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: isSmallScreen ? 12 : 16,
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                _buildDeviceItem(context),
+                                _buildDeviceItem(context),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+
+            // Floating Close Button
+            Positioned(
+              top: -50,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle, // Makes the container circular
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xFF712FA0),
+                          Color(0xFF362F91),
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showChangePasswordPopup(BuildContext context) {
+    bool newPasswordVisible = false;
+    bool confirmPasswordVisible = false;
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 360;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      enableDrag: true,
+      builder: (BuildContext context) {
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            StatefulBuilder(
+              builder: (context, setState) {
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  height: MediaQuery.of(context).size.height * 0.7,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFF35035A),
+                        Color(0xFF510985),
+                        Color(0xFF35035A),
+                      ],
+                      stops: [0.1572, 0.5, 0.8753],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
+                            colors: [
+                              Color(0xFF83410A),
+                              Color(0xFFE97411),
+                              Color(0xFF88440A),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(20),
+                            topRight: Radius.circular(20),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // IconButton(
+                              //   icon: const Icon(Icons.arrow_back,
+                              //       color: Colors.white),
+                              //   onPressed: () => Navigator.pop(context),
+                              // ),
+                              const Text(
+                                'CHANGE PASSWORD',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: screenSize.height * 0.04),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: isSmallScreen ? 12 : 16,
+                            ),
+                            child: Column(
+                              children: [
+                                TextField(
+                                  decoration: InputDecoration(
+                                    labelText: 'Current Password',
+                                    labelStyle: TextStyle(color: Colors.white),
+                                    enabledBorder: UnderlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.white),
+                                    ),
+                                  ),
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                SizedBox(height: 16),
+                                TextField(
+                                  decoration: InputDecoration(
+                                    labelText: 'New Password',
+                                    labelStyle: TextStyle(color: Colors.white),
+                                    enabledBorder: UnderlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.white),
+                                    ),
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        newPasswordVisible
+                                            ? Icons.visibility_off
+                                            : Icons.visibility,
+                                        color: Colors.white,
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          newPasswordVisible =
+                                              !newPasswordVisible;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                  obscureText: !newPasswordVisible,
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                SizedBox(height: 16),
+                                TextField(
+                                  decoration: InputDecoration(
+                                    labelText: 'Confirm Password',
+                                    labelStyle: TextStyle(color: Colors.white),
+                                    enabledBorder: UnderlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.white),
+                                    ),
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        confirmPasswordVisible
+                                            ? Icons.visibility_off
+                                            : Icons.visibility,
+                                        color: Colors.white,
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          confirmPasswordVisible =
+                                              !confirmPasswordVisible;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                  obscureText: !confirmPasswordVisible,
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                SizedBox(height: 24),
+                                Container(
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Color(0xFF83410A),
+                                        Color(0xFFE97411),
+                                        Color(0xFF88440A),
+                                      ],
+                                      stops: [0.071, 0.491, 0.951],
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                    ),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      // Implement save changes logic here
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.transparent,
+                                      shadowColor: Colors.transparent,
+                                      minimumSize: Size(double.infinity, 48),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      'SAVE CHANGES',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            Positioned(
+              top: -50,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle, // Makes the container circular
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xFF712FA0),
+                          Color(0xFF362F91),
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         );
       },
     );
@@ -809,6 +1690,7 @@ class AccountScreen extends StatelessWidget {
     );
   }
 
+  //
   void _showSignOutDevicePopup(BuildContext context) {
     showDialog(
       context: context,
@@ -835,7 +1717,7 @@ class AccountScreen extends StatelessWidget {
                 Padding(
                   padding: EdgeInsets.all(16),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         'LOG IN DEVICES',
@@ -845,10 +1727,10 @@ class AccountScreen extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      IconButton(
-                        icon: Icon(Icons.close, color: Colors.white),
-                        onPressed: () => Navigator.pop(context),
-                      ),
+                      // IconButton(
+                      //   icon: Icon(Icons.close, color: Colors.white),
+                      //   onPressed: () => Navigator.pop(context),
+                      // ),
                     ],
                   ),
                 ),
@@ -973,378 +1855,6 @@ class AccountScreen extends StatelessWidget {
       ),
     );
   }
-
-  void _showChangePasswordPopup(BuildContext context) {
-    // Add these boolean variables to track password visibility
-    bool newPasswordVisible = false;
-    bool confirmPasswordVisible = false;
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          // Wrap with StatefulBuilder to manage state
-          builder: (context, setState) {
-            return Dialog(
-              backgroundColor: Colors.transparent,
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Color(0xFF35035A),
-                      Color(0xFF510985),
-                      Color(0xFF35035A),
-                    ],
-                    stops: [0.1572, 0.5, 0.8753],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'CHANGE PASSWORD',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.close, color: Colors.white),
-                            onPressed: () => Navigator.pop(context),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          TextField(
-                            decoration: InputDecoration(
-                              labelText: 'Current Password',
-                              labelStyle: TextStyle(color: Colors.white),
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white),
-                              ),
-                            ),
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          SizedBox(height: 16),
-                          TextField(
-                            decoration: InputDecoration(
-                              labelText: 'New Password',
-                              labelStyle: TextStyle(color: Colors.white),
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white),
-                              ),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  newPasswordVisible
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
-                                  color: Colors.white,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    newPasswordVisible = !newPasswordVisible;
-                                  });
-                                },
-                              ),
-                            ),
-                            obscureText: !newPasswordVisible,
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          SizedBox(height: 16),
-                          TextField(
-                            decoration: InputDecoration(
-                              labelText: 'Confirm Password',
-                              labelStyle: TextStyle(color: Colors.white),
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white),
-                              ),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  confirmPasswordVisible
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
-                                  color: Colors.white,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    confirmPasswordVisible =
-                                        !confirmPasswordVisible;
-                                  });
-                                },
-                              ),
-                            ),
-                            obscureText: !confirmPasswordVisible,
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          SizedBox(height: 24),
-                          Container(
-                            width: double
-                                .infinity, // Ensures the button takes full width
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Color(0xFF83410A),
-                                  Color(0xFFE97411),
-                                  Color(0xFF88440A),
-                                ],
-                                stops: [0.071, 0.491, 0.951],
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                              ),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: ElevatedButton(
-                              onPressed: () {
-                                // Implement save changes logic here
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors
-                                    .transparent, // Transparent to show gradient
-                                shadowColor:
-                                    Colors.transparent, // Remove shadow
-                                minimumSize: Size(double.infinity,
-                                    48), // Full-width with 48 height
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                              child: Text(
-                                'SAVE CHANGES',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  void _show2StepVerificationPopup(BuildContext context) {
-    // Controller for the 4-digit code
-    List<TextEditingController> codeControllers = List.generate(
-      4,
-      (index) => TextEditingController(),
-    );
-    List<FocusNode> focusNodes = List.generate(
-      4,
-      (index) => FocusNode(),
-    );
-
-    // Countdown timer state
-    int remainingTime = 30;
-    Timer? countdownTimer;
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            // Start the timer when the dialog is shown
-            countdownTimer ??= Timer.periodic(Duration(seconds: 1), (timer) {
-              setState(() {
-                if (remainingTime > 0) {
-                  remainingTime--;
-                } else {
-                  countdownTimer?.cancel();
-                }
-              });
-            });
-
-            return Dialog(
-              backgroundColor: Colors.transparent,
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Color(0xFF35035A),
-                      Color(0xFF510985),
-                      Color(0xFF35035A),
-                    ],
-                    stops: [0.1572, 0.5, 0.8753],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            '2-STEP VERIFICATION',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.close, color: Colors.white),
-                            onPressed: () {
-                              countdownTimer?.cancel();
-                              Navigator.pop(context);
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Text(
-                        'Enter the 4-digit verification code we texted to your phone',
-                        style: TextStyle(
-                          color: Colors.orange,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 40),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: List.generate(
-                          4,
-                          (index) => Container(
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: Colors.purple.shade300,
-                                width: 2,
-                              ),
-                            ),
-                            child: TextField(
-                              controller: codeControllers[index],
-                              focusNode: focusNodes[index],
-                              textAlign: TextAlign.center,
-                              keyboardType: TextInputType.number,
-                              maxLength: 1,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              decoration: InputDecoration(
-                                counterText: "",
-                                border: InputBorder.none,
-                              ),
-                              onChanged: (value) {
-                                if (value.length == 1 && index < 3) {
-                                  focusNodes[index + 1].requestFocus();
-                                }
-                              },
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 24),
-                    Container(
-                      margin: EdgeInsets.symmetric(horizontal: 16),
-                      width: double.infinity,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Color(0xFF712FA0),
-                              Color(0xFF362F91),
-                            ],
-                            stops: [0.0155, 0.9845],
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // Implement submit logic here
-                            String code = codeControllers
-                                .map((controller) => controller.text)
-                                .join();
-                            print('Submitted code: $code');
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                          ),
-                          child: Text(
-                            'Submit',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Re-send Code in ',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                            ),
-                          ),
-                          Text(
-                            '0:${remainingTime}s',
-                            style: TextStyle(
-                              color: Colors.orange,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    ).then((_) {
-      countdownTimer?.cancel(); // Cancel timer when dialog is dismissed
-    });
-  }
 }
 
 class PasswordTextField extends StatefulWidget {
@@ -1447,10 +1957,11 @@ class _PauseAccountPopupState extends State<_PauseAccountPopup> {
           Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              // crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       'PAUSE ACCOUNT',
@@ -1460,18 +1971,18 @@ class _PauseAccountPopupState extends State<_PauseAccountPopup> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    IconButton(
-                      icon: Icon(Icons.close, color: Colors.white),
-                      onPressed: () => Navigator.pop(context),
-                    ),
+                    // IconButton(
+                    //   icon: Icon(Icons.close, color: Colors.white),
+                    //   onPressed: () => Navigator.pop(context),
+                    // ),
                   ],
                 ),
                 SizedBox(height: 10),
                 Text(
                   'If you want to take a break from AAG account, you can temporarily pause this account',
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: Colors.white, fontSize: 20),
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 40),
                 Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -1495,7 +2006,7 @@ class _PauseAccountPopupState extends State<_PauseAccountPopup> {
                     ],
                   ),
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 40),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -1987,6 +2498,389 @@ class _ShowReasonDialogState extends State<_ShowReasonDialog> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _PauseAccountSheet extends StatefulWidget {
+  @override
+  _PauseAccountSheetState createState() => _PauseAccountSheetState();
+}
+
+class _PauseAccountSheetState extends State<_PauseAccountSheet> {
+  final PageController _pageController = PageController();
+  String? selectedReason;
+  final TextEditingController _passwordController = TextEditingController();
+  Map<String, bool> selectedOptions = {
+    'break': false,
+    'trouble': false,
+    'data': false,
+    'privacy': false,
+    'busy': false,
+    'else': false,
+  };
+
+  void _nextPage() {
+    _pageController.nextPage(
+      duration: Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          height: MediaQuery.of(context).size.height * 0.5,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [
+                Color(0xFF35035A),
+                Color(0xFF510985),
+                Color(0xFF35035A),
+              ],
+              stops: [0.1572, 0.5, 0.8753],
+            ),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          child: Column(
+            children: [
+              // Header with gradient
+              Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [
+                      Color(0xFF83410A),
+                      Color(0xFFE97411),
+                      Color(0xFF88440A),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      // IconButton(
+                      //   icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      //   onPressed: () => Navigator.pop(context),
+                      // ),
+                      const Text(
+                        'PAUSE ACCOUNT',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // PageView for different sections
+              Expanded(
+                child: PageView(
+                  controller: _pageController,
+                  physics: NeverScrollableScrollPhysics(),
+                  children: [
+                    _buildInitialPage(),
+                    _buildReasonSelectionPage(),
+                    _buildPasswordVerificationPage(),
+                    _buildFinalConfirmationPage(),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Floating Close Button
+        Positioned(
+          top: -50,
+          left: 0,
+          right: 0,
+          child: Center(
+            child: GestureDetector(
+              onTap: () => Navigator.of(context).pop(),
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle, // Makes the container circular
+                  gradient: LinearGradient(
+                    colors: [
+                      Color(0xFF712FA0),
+                      Color(0xFF362F91),
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.close_rounded,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInitialPage() {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'If you want to take a break from AAG account, you can temporarily pause this account',
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+            SizedBox(height: 40),
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color.fromARGB(71, 113, 47, 160),
+                    Color.fromARGB(79, 54, 47, 145),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: RadioListTile<String>(
+                title: Text('Select to confirm and proceed',
+                    style: TextStyle(color: Colors.white)),
+                value: 'confirm',
+                groupValue: selectedReason,
+                activeColor: Color(0xFFE97411),
+                onChanged: (String? value) {
+                  setState(() {
+                    selectedReason = value;
+                  });
+                },
+              ),
+            ),
+            SizedBox(height: 40),
+            _buildActionButtons(
+              onCancel: () => Navigator.pop(context),
+              onContinue: _nextPage,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReasonSelectionPage() {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Pause your AAG account',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 20),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Color(0xFFE97411),
+                  width: 1,
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                children: selectedOptions.keys.map((key) {
+                  return _buildCheckboxOption(key);
+                }).toList(),
+              ),
+            ),
+            SizedBox(height: 20),
+            _buildActionButtons(
+              onCancel: () => Navigator.pop(context),
+              onContinue: _nextPage,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPasswordVerificationPage() {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            CircleAvatar(
+              backgroundImage: AssetImage('lib/images/ch.png'),
+              radius: 30,
+            ),
+            SizedBox(height: 40),
+            Text(
+              'For your security, please re-enter your password to continue',
+              style: TextStyle(color: Colors.white),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 40),
+            PasswordTextField(
+              label: 'Password',
+              controller: _passwordController,
+              isPassword: true,
+            ),
+            SizedBox(height: 40),
+            _buildActionButtons(
+              onCancel: () => Navigator.pop(context),
+              onContinue: _nextPage,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFinalConfirmationPage() {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            Text(
+              'Confirm temporary account pause',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 40),
+            Text(
+              'You\'re about to temporarily pause your account. You can reactivate your account at any time through Accounts Center or by logging into your AAG account.',
+              style: TextStyle(fontSize: 20, color: Colors.red),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 40),
+            _buildActionButtons(
+              onCancel: () => Navigator.pop(context),
+              onContinue: () {
+                Navigator.of(context, rootNavigator: true)
+                    .popUntil((route) => route.isFirst);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCheckboxOption(String key) {
+    String title = key == 'break'
+        ? 'Just need a break'
+        : key == 'trouble'
+            ? 'Trouble getting started'
+            : key == 'data'
+                ? 'Concerned about my data'
+                : key == 'privacy'
+                    ? 'Privacy Concerns'
+                    : key == 'busy'
+                        ? 'Too busy/ too distracting'
+                        : 'Something else';
+
+    return CheckboxListTile(
+      title: Text(title, style: TextStyle(color: Colors.white)),
+      value: selectedOptions[key],
+      activeColor: Color(0xFFE97411),
+      checkColor: Colors.white,
+      onChanged: (bool? value) {
+        setState(() {
+          selectedOptions[key] = value ?? false;
+        });
+      },
+    );
+  }
+
+  Widget _buildActionButtons({
+    required VoidCallback onCancel,
+    required VoidCallback onContinue,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        Container(
+          width: 120,
+          height: 44,
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: Color(0xFFE97411),
+              width: 2,
+            ),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: TextButton(
+            onPressed: onCancel,
+            child: Text(
+              'CANCEL',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF83410A),
+                Color(0xFFE97411),
+                Color(0xFF88440A),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: ElevatedButton(
+            onPressed: onContinue,
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+              backgroundColor: Colors.transparent,
+              shadowColor: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(
+              'CONTINUE',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

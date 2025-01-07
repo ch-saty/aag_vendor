@@ -2,16 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class LeaderboardWidget extends StatefulWidget {
-  const LeaderboardWidget({super.key});
+  final bool isComponent;
+
+  const LeaderboardWidget({
+    super.key,
+    this.isComponent = true,
+  });
 
   @override
-  _LeaderboardWidgetState createState() => _LeaderboardWidgetState();
+  State<LeaderboardWidget> createState() => _LeaderboardWidgetState();
 }
 
 class _LeaderboardWidgetState extends State<LeaderboardWidget>
     with SingleTickerProviderStateMixin {
-  int _currentIndex = 1; // Start with REVENUE (index 1)
-  final List<String> _categories = ["POPULAR", "REVENUE", "POINTS"];
+  int _selectedTabIndex = 0;
+  final List<String> _tabs = ["POPULAR", "REVENUE", "POINTS"];
   late AnimationController _animationController;
   bool _isAnimating = false;
 
@@ -20,7 +25,7 @@ class _LeaderboardWidgetState extends State<LeaderboardWidget>
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 300),
     );
   }
 
@@ -30,7 +35,8 @@ class _LeaderboardWidgetState extends State<LeaderboardWidget>
     super.dispose();
   }
 
-  // Simulated data fetching functions
+  // Keep your existing data fetching functions
+
   List<Map<String, dynamic>> fetchPopularData() {
     return [
       {'rank': 1, 'name': 'Shivam', 'value': '500k+'},
@@ -59,7 +65,7 @@ class _LeaderboardWidgetState extends State<LeaderboardWidget>
   }
 
   List<Map<String, dynamic>> getCurrentData() {
-    switch (_categories[_currentIndex]) {
+    switch (_tabs[_selectedTabIndex]) {
       case 'POPULAR':
         return fetchPopularData();
       case 'REVENUE':
@@ -71,24 +77,14 @@ class _LeaderboardWidgetState extends State<LeaderboardWidget>
     }
   }
 
-  Future<void> _onSwipe(DragEndDetails details) async {
-    if (_isAnimating) return;
+  Future<void> _switchToTab(int newIndex) async {
+    if (_isAnimating || newIndex == _selectedTabIndex) return;
 
-    int newIndex;
-    if (details.primaryVelocity! > 0) {
-      // Swiped right
-      newIndex = (_currentIndex - 1 + _categories.length) % _categories.length;
-    } else {
-      // Swiped left
-      newIndex = (_currentIndex + 1) % _categories.length;
-    }
-
-    // Haptic feedback
     await HapticFeedback.mediumImpact();
 
     setState(() {
       _isAnimating = true;
-      _currentIndex = newIndex;
+      _selectedTabIndex = newIndex;
     });
 
     await _animationController.forward(from: 0.0);
@@ -99,146 +95,132 @@ class _LeaderboardWidgetState extends State<LeaderboardWidget>
 
   @override
   Widget build(BuildContext context) {
-    final currentData = getCurrentData();
-
-    return GestureDetector(
-      onHorizontalDragEnd: _onSwipe,
-      child: Container(
-        width: MediaQuery.of(context).size.width * 0.96,
-        decoration: BoxDecoration(
-          color: const Color.fromARGB(120, 0, 0, 0).withOpacity(0.2),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  for (int i = 0; i < _categories.length; i++)
-                    _leaderboardTab(_categories[i], _currentIndex == i),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 500),
-              transitionBuilder: (Widget child, Animation<double> animation) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: SlideTransition(
-                    position: animation.drive(Tween<Offset>(
-                      begin: const Offset(0.0, 0.3),
-                      end: Offset.zero,
-                    ).chain(CurveTween(curve: Curves.easeOut))),
-                    child: child,
-                  ),
-                );
-              },
-              child: _buildLeaderboardContent(currentData),
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLeaderboardContent(List<Map<String, dynamic>> data) {
-    return Column(
-      key: ValueKey<int>(_currentIndex),
-      children: data
-          .map((item) => _buildLeaderboardItem(
-                item['rank'],
-                item['name'],
-                item['value'],
-                item['rank'] <= 3,
-              ))
-          .toList(),
-    );
-  }
-
-  Widget _leaderboardTab(String text, bool isActive) {
-    return GestureDetector(
-      onTap: () async {
-        if (_currentIndex != _categories.indexOf(text) && !_isAnimating) {
-          await HapticFeedback.selectionClick();
-          await _onSwipe(DragEndDetails(
-            primaryVelocity:
-                _categories.indexOf(text) > _currentIndex ? -1000 : 1000,
-          ));
-        }
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(
-              color: isActive ? Colors.orange : Colors.transparent,
-              width: 2,
-            ),
-          ),
-        ),
-        child: Text(
-          text,
-          style: TextStyle(
-            color: isActive ? Colors.orange : Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLeaderboardItem(
-      int rank, String name, String value, bool isTopThree) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          _buildTabBar(),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: _buildLeaderboardContent(
+              key: ValueKey(_selectedTabIndex),
+              entries: getCurrentData(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabBar() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+        child: Row(
+          children: _tabs.asMap().entries.map((entry) {
+            final index = entry.key;
+            final tab = entry.value;
+            return GestureDetector(
+              onTap: () => _switchToTab(index),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: _selectedTabIndex == index
+                          ? Colors.purple
+                          : Colors.transparent,
+                      width: 2,
+                    ),
+                  ),
+                ),
+                child: Text(
+                  tab,
+                  style: TextStyle(
+                    color: _selectedTabIndex == index
+                        ? Colors.purple
+                        : Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLeaderboardContent({
+    required Key key,
+    required List<Map<String, dynamic>> entries,
+  }) {
+    return ListView.builder(
+      key: key,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(8),
+      itemCount: entries.length,
+      itemBuilder: (context, index) {
+        final entry = entries[index];
+        return _buildLeaderboardItem(
+          rank: entry['rank'],
+          name: entry['name'],
+          value: entry['value'],
+          isTopThree: entry['rank'] <= 3,
+        );
+      },
+    );
+  }
+
+  Widget _buildLeaderboardItem({
+    required int rank,
+    required String name,
+    required String value,
+    required bool isTopThree,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isTopThree
               ? [
                   const Color.fromRGBO(101, 47, 157, 1),
-                  const Color.fromRGBO(57, 47, 146, 1)
+                  const Color.fromRGBO(57, 47, 146, 1),
                 ]
-              : [
-                  const Color.fromARGB(255, 237, 55, 173),
-                  const Color.fromARGB(255, 245, 153, 33)
-                ],
+              : [Colors.purple.shade100, Colors.purple.shade200],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
         ),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+        padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            if (isTopThree) _buildMedal(rank),
-            // Display the medal image if the name is "You"
-            if (name == 'You') ...[
-              const SizedBox(width: 2),
-              Image.asset(
-                'lib/images/rank.png',
-                height: 40,
-                width: 40,
-              ),
-            ],
-            if (name != 'You') const SizedBox(width: 10),
-            Text(
-              "#$rank",
-              style: const TextStyle(color: Colors.white70, fontSize: 14),
-            ),
-            const SizedBox(width: 10),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(25),
-              child: Image.asset(
-                'lib/images/ch.png',
-                height: 50,
-                width: 50,
-              ),
-            ),
-            const SizedBox(width: 15),
+            _buildRankAndAvatar(rank, name, isTopThree),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -246,28 +228,19 @@ class _LeaderboardWidgetState extends State<LeaderboardWidget>
                   Text(
                     name,
                     style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold),
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    value,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 12,
+                    ),
                   ),
                 ],
               ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  _getCategoryLabel(),
-                  style: const TextStyle(color: Colors.white70, fontSize: 12),
-                ),
-                Text(
-                  value,
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold),
-                ),
-              ],
             ),
           ],
         ),
@@ -275,35 +248,48 @@ class _LeaderboardWidgetState extends State<LeaderboardWidget>
     );
   }
 
-  Widget _buildMedal(int rank) {
-    final medalImages = [
-      'lib/images/gold.png',
-      'lib/images/silver.png',
-      'lib/images/bronze.png'
-    ];
-    return Container(
-      width: 40,
-      height: 40,
-      child: Center(
-        child: Image.asset(
-          medalImages[rank - 1],
-          width: 40,
-          height: 40,
+  Widget _buildRankAndAvatar(int rank, String name, bool isTopThree) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        CircleAvatar(
+          radius: 24,
+          backgroundImage: AssetImage('lib/images/ch.png'),
         ),
-      ),
+        if (isTopThree)
+          Positioned(
+            top: -8,
+            left: -8,
+            child: Image.asset(
+              'lib/images/${rank == 1 ? 'gold' : rank == 2 ? 'silver' : 'bronze'}.png',
+              width: 24,
+              height: 24,
+            ),
+          ),
+        if (!isTopThree)
+          Positioned(
+            top: -8,
+            left: -8,
+            child: Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                color: Colors.purple[400],
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  '$rank',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
-  }
-
-  String _getCategoryLabel() {
-    switch (_categories[_currentIndex]) {
-      case 'POPULAR':
-        return 'FOLLOWERS';
-      case 'REVENUE':
-        return 'REVENUE';
-      case 'POINTS':
-        return 'POINTS';
-      default:
-        return '';
-    }
   }
 }

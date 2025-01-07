@@ -9,6 +9,9 @@ class PromotionalsSlider2 extends StatefulWidget {
     {'image': 'lib/images/hsb1.png'},
     {'image': 'lib/images/hsb2.png'},
     {'image': 'lib/images/hsb1.png'},
+    {'image': 'lib/images/hsb1.png'},
+    {'image': 'lib/images/hsb2.png'},
+    {'image': 'lib/images/hsb1.png'},
   ];
 
   PromotionalsSlider2({super.key});
@@ -73,16 +76,15 @@ class _PromotionalsSlider2State extends State<PromotionalsSlider2>
 
   @override
   Widget build(BuildContext context) {
-    // Responsive sizing calculations
-    final screenHeight = MediaQuery.of(context).size.height * 0.30;
-    final screenWidth = MediaQuery.of(context).size.width * 0.90;
+    final screenSize = MediaQuery.of(context).size;
+    final sliderHeight = screenSize.height * 0.20;
+    final sliderWidth = screenSize.width * 0.95;
 
     return SizedBox(
-      height: screenHeight, // 55% of the screen height
-      width: screenWidth, // Full width of the screen
+      height: sliderHeight,
+      width: sliderWidth,
       child: Stack(
         children: [
-          // Image slider
           PageView.builder(
             controller: _pageController,
             scrollDirection: Axis.horizontal,
@@ -98,39 +100,12 @@ class _PromotionalsSlider2State extends State<PromotionalsSlider2>
               final promotion = widget.promotions[index];
               return Image.asset(
                 promotion['image'] ?? '',
-                fit: BoxFit.contain, // Ensure image fills the space
-                height: screenHeight * 0.55, // Height based on screen height
-                width: screenWidth, // Full width of the screen
+                fit: BoxFit.cover,
+                // height: sliderHeight * 0.55,
+                // width: sliderWidth,
               );
             },
           ),
-          // const SizedBox(height: 15),
-          // Positioned dot indicator at the bottom of the image
-          //   Positioned(
-          //     bottom:
-          //         0, // Adjust this to set how far from the bottom you want the dots
-          //     left: 0,
-          //     right: 0,
-          //     child: Row(
-          //       mainAxisAlignment: MainAxisAlignment.center,
-          //       children: List.generate(
-          //         widget.promotions.length,
-          //         (index) => Padding(
-          //           padding: const EdgeInsets.symmetric(horizontal: 3),
-          //           child: AnimatedContainer(
-          //             duration: const Duration(milliseconds: 300),
-          //             width: _currentPage == index ? 8 : 5, // Size of dots
-          //             height: _currentPage == index ? 8 : 5, // Size of dots
-          //             decoration: BoxDecoration(
-          //               shape: BoxShape.circle,
-          //               color:
-          //                   _currentPage == index ? Colors.orange : Colors.white,
-          //             ),
-          //           ),
-          //         ),
-          //       ),
-          //     ),
-          //   ),
         ],
       ),
     );

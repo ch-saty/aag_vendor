@@ -1,7 +1,6 @@
 import 'package:AAG/DailyTaskScreen/dailytaskscreen.dart';
-import 'package:AAG/Notification_Screen/notification_screen.dart';
+import 'package:AAG/tobeadded/notification_icon_counter.dart';
 import 'package:flutter/material.dart';
-import 'package:audioplayers/audioplayers.dart';
 import 'dart:async';
 import 'dart:math';
 
@@ -19,14 +18,15 @@ class _CustomAppBarState extends State<CustomAppBar>
     with TickerProviderStateMixin {
   late AnimationController _wiggleController;
   late AnimationController _spinController;
-  late AudioPlayer _audioPlayer;
+  // final AudioPlayer _audioPlayer = AudioPlayer();
 
   @override
   void initState() {
     super.initState();
 
     // Initialize audio player
-    _audioPlayer = AudioPlayer();
+    // _audioPlayer.setSource(AssetSource('assets/sounds/bell_ring2.mp3'));
+    // _audioPlayer.setVolume(1.0);
 
     // Wiggle animation controller
     _wiggleController = AnimationController(
@@ -51,22 +51,26 @@ class _CustomAppBarState extends State<CustomAppBar>
     });
   }
 
+  // void _playSound() async {
+  //   await _audioPlayer.play(AssetSource('assets/sounds/bell_ring2.mp3'));
+  // }
+
   void startAnimations() async {
+    // Play bell sound
+    // _playSound();
+
     // Play wiggle animation
     _wiggleController.forward().then((_) => _wiggleController.reverse());
 
     // Play spin animation
     _spinController.forward().then((_) => _spinController.reverse());
-
-    // Play notification sound
-    await _audioPlayer.play(AssetSource('images/bell_ring.mp3'));
   }
 
   @override
   void dispose() {
     _wiggleController.dispose();
     _spinController.dispose();
-    _audioPlayer.dispose();
+    // _audioPlayer.dispose();
     super.dispose();
   }
 
@@ -75,34 +79,29 @@ class _CustomAppBarState extends State<CustomAppBar>
     final screenSize = MediaQuery.of(context).size;
 
     return AppBar(
-      backgroundColor: Colors.transparent,
+      backgroundColor: const Color.fromARGB(255, 102, 44, 144),
       leading: GestureDetector(
         onTap: () {
           Scaffold.of(context).openDrawer();
         },
-        child: Container(
-          width: 20,
-          height: screenSize.height * 0.04,
-          padding: const EdgeInsets.all(5),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
-            shape: BoxShape.circle,
-          ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10.0),
           child: Image.asset(
             'lib/images/ch.png',
-            height: 30,
-            // width: 20,
+            height: 16,
+            fit: BoxFit.contain,
           ),
         ),
       ),
       title: Padding(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Image.asset(
               'lib/images/aag_white.png',
-              height: screenSize.height * 0.04,
+              height: 32,
+              fit: BoxFit.contain,
             ),
           ],
         ),
@@ -110,33 +109,10 @@ class _CustomAppBarState extends State<CustomAppBar>
       actions: [
         Row(
           children: [
-            // Animated bell icon
+            const NotificationIconWithCounter(),
             GestureDetector(
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const NotificationScreen()),
-                );
-              },
-              child: AnimatedBuilder(
-                animation: _wiggleController,
-                builder: (context, child) {
-                  return Transform.translate(
-                    offset:
-                        Offset(sin(_wiggleController.value * 2 * pi) * 10, 0),
-                    child: Icon(
-                      Icons.notifications_none_rounded,
-                      color: Colors.white,
-                      size: screenSize.height * 0.036,
-                    ),
-                  );
-                },
-              ),
-            ),
-            // Animated chakra
-            GestureDetector(
-              onTap: () {
+                // _playSound();
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -162,24 +138,6 @@ class _CustomAppBarState extends State<CustomAppBar>
           ],
         ),
       ],
-      bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(2),
-        child: Container(
-          height: 4,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [
-                Color.fromRGBO(239, 119, 17, 0),
-                Color.fromRGBO(239, 119, 17, 1),
-                Color.fromRGBO(239, 119, 17, 0),
-              ],
-              stops: [0.0, 0.5, 1.0],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

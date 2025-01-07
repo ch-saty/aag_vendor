@@ -1,9 +1,10 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:math';
 
-import 'package:AAG/tobeadded/gradient_button.dart';
+import 'package:AAG/PublishGameScreen/schedulegamescreen_2.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'dart:ui';
 
 class ScheduledGameScreen extends StatefulWidget {
   const ScheduledGameScreen({super.key});
@@ -20,11 +21,6 @@ class _ScheduledGameScreenState extends State<ScheduledGameScreen>
 
   // Add animations for schedule popup
   late AnimationController _gradientAnimationController;
-  late Animation<double> _gradientAnimation;
-  late Animation<double> _rotationAnimation;
-  late Animation<double> _popupScaleAnimation;
-  late Animation<Color?> _colorAnimation1;
-  late Animation<Color?> _colorAnimation2;
   String? scheduledInfo;
 
   @override
@@ -47,31 +43,6 @@ class _ScheduledGameScreenState extends State<ScheduledGameScreen>
       vsync: this,
     )..repeat();
 
-    _gradientAnimation = Tween<double>(
-      begin: -1.0,
-      end: 2.0,
-    ).animate(_gradientAnimationController);
-
-    _rotationAnimation = Tween<double>(
-      begin: 0.0,
-      end: 2.0 * 3.14159,
-    ).animate(_gradientAnimationController);
-
-    _popupScaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.2,
-    ).animate(_gradientAnimationController);
-
-    _colorAnimation1 = ColorTween(
-      begin: Colors.purple,
-      end: Colors.blue,
-    ).animate(_gradientAnimationController);
-
-    _colorAnimation2 = ColorTween(
-      begin: Colors.blue,
-      end: Colors.purple,
-    ).animate(_gradientAnimationController);
-
     // Delay to trigger fade-in effect
     Future.delayed(const Duration(milliseconds: 300), () {
       setState(() {
@@ -90,157 +61,160 @@ class _ScheduledGameScreenState extends State<ScheduledGameScreen>
   Future<void> _showSchedulePopup() async {
     DateTime? selectedDate;
     TimeOfDay? selectedTime;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: const Color.fromARGB(255, 102, 44, 144),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
       ),
       builder: (BuildContext context) {
-        return AnimatedBuilder(
-          animation: _gradientAnimationController,
-          builder: (context, child) {
-            return ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(25)),
-              child: CustomPaint(
-                painter: ComplexGradientPainter(
-                  animation: _gradientAnimation,
-                  rotationAnimation: _rotationAnimation,
-                  scaleAnimation: _popupScaleAnimation,
-                  colorAnimation1: _colorAnimation1,
-                  colorAnimation2: _colorAnimation2,
-                ),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius:
-                          const BorderRadius.vertical(top: Radius.circular(25)),
-                      color: Colors.black.withOpacity(0.1),
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Container(
+              decoration: BoxDecoration(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(25)),
+              ),
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                    20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Schedule Game',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(20, 20, 20,
-                          MediaQuery.of(context).viewInsets.bottom + 20),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
+                    Container(
+                      margin: const EdgeInsets.symmetric(vertical: 15),
+                      height: 1,
+                      color: Colors.white24,
+                    ),
+                    ListTile(
+                      title: const Text(
+                        'Select Date',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Schedule Game',
+                          Text(
+                            selectedDate != null
+                                ? DateFormat('EEE, MMM d, yyyy')
+                                    .format(selectedDate!)
+                                : 'Choose a date',
                             style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              shadows: [
-                                Shadow(
-                                  blurRadius: 8.0,
-                                  color: Colors.black26,
-                                  offset: Offset(2.0, 2.0),
-                                ),
-                              ],
+                              color: Colors.white.withOpacity(0.7),
                             ),
-                          ),
-                          Container(
-                            margin: const EdgeInsets.symmetric(vertical: 15),
-                            height: 1,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment(_gradientAnimation.value, 0),
-                                end: Alignment(-_gradientAnimation.value, 0),
-                                colors: const [
-                                  Colors.white24,
-                                  Colors.white,
-                                  Colors.white24,
-                                ],
-                              ),
-                            ),
-                          ),
-                          ListTile(
-                            title: const Text(
-                              'Select Date',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            subtitle: Text(
-                              selectedDate != null
-                                  ? DateFormat('EEE, MMM d, yyyy')
-                                      .format(selectedDate!)
-                                  : 'Choose a date',
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.7),
-                              ),
-                            ),
-                            trailing: Icon(
-                              Icons.calendar_today,
-                              color: Colors.white.withOpacity(0.9),
-                            ),
-                            onTap: () async {
-                              DateTime? pickedDate = await showDatePicker(
-                                context: context,
-                                initialDate: DateTime.now(),
-                                firstDate: DateTime.now(),
-                                lastDate: DateTime(2101),
-                              );
-                              if (pickedDate != null) {
-                                setState(() {
-                                  selectedDate = pickedDate;
-                                });
-                              }
-                            },
-                          ),
-                          ListTile(
-                            title: const Text(
-                              'Select Time',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            subtitle: Text(
-                              selectedTime != null
-                                  ? selectedTime!.format(context)
-                                  : 'Choose a time',
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.7),
-                              ),
-                            ),
-                            trailing: Icon(
-                              Icons.access_time,
-                              color: Colors.white.withOpacity(0.9),
-                            ),
-                            onTap: () async {
-                              TimeOfDay? pickedTime = await showTimePicker(
-                                context: context,
-                                initialTime: TimeOfDay.now(),
-                              );
-                              if (pickedTime != null) {
-                                setState(() {
-                                  selectedTime = pickedTime;
-                                });
-                              }
-                            },
-                          ),
-                          const SizedBox(height: 20),
-                          CustomButton(
-                            onTap: () {
-                              if (selectedDate != null &&
-                                  selectedTime != null) {
-                                setState(() {
-                                  scheduledInfo =
-                                      "Scheduled on ${DateFormat('EEE, MMM d, yyyy').format(selectedDate!)} at ${selectedTime!.format(context)}";
-                                });
-                                Navigator.pop(context);
-                              }
-                            },
-                            text: 'Schedule',
                           ),
                         ],
                       ),
+                      trailing: Icon(
+                        Icons.calendar_today,
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                      onTap: () async {
+                        DateTime? pickedDate = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime(2101),
+                        );
+                        if (pickedDate != null) {
+                          setState(() {
+                            selectedDate = pickedDate;
+                          });
+                        }
+                      },
                     ),
-                  ),
+                    ListTile(
+                      title: const Text(
+                        'Select Time',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            selectedTime != null
+                                ? selectedTime!.format(context)
+                                : 'Choose a time',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.7),
+                            ),
+                          ),
+                        ],
+                      ),
+                      trailing: Icon(
+                        Icons.access_time,
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                      onTap: () async {
+                        TimeOfDay? pickedTime = await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay.now(),
+                        );
+                        if (pickedTime != null) {
+                          setState(() {
+                            selectedTime = pickedTime;
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (selectedDate != null && selectedTime != null) {
+                          // Close the bottom sheet first
+                          Navigator.pop(context);
+
+                          // Create the scheduled info
+                          String formattedSchedule =
+                              "Scheduled for ${DateFormat('EEE, MMM d, yyyy').format(selectedDate!)} at ${selectedTime!.format(context)}";
+
+                          // Show SnackBar
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(formattedSchedule),
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+
+                          // Navigate to EditableScheduledTournamentScreen after 2 seconds
+                          Future.delayed(const Duration(seconds: 2), () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    EditableScheduledGameScreen(),
+                              ),
+                            );
+                          });
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.black,
+                        backgroundColor: Colors.white,
+                        minimumSize: Size(double.infinity, 48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text('Schedule'),
+                    ),
+                  ],
                 ),
               ),
             );

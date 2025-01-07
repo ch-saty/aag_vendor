@@ -29,11 +29,15 @@ class _CustomButtonState extends State<CustomButton> {
         onTapCancel: () => setState(() => _isPressed = false),
         child: Container(
           constraints: const BoxConstraints(
-            minWidth: 150, // Minimum width
+            minWidth: 140, // Minimum width
             minHeight: 50, // Minimum height
           ),
+          // color: const Color.fromARGB(255, 255, 146, 29),
+
+          // rgba(255, 146, 29, 1),
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.deepPurple, width: 2),
+            // border: Border.all(color: Colors.deepPurple, width: 2),
+            color: const Color.fromARGB(255, 255, 146, 29),
             borderRadius: BorderRadius.circular(10),
           ),
           child: ElevatedButton(

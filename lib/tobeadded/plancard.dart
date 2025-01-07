@@ -1,3 +1,4 @@
+import 'package:AAG/Wallet_Screen/wallet_screen.dart';
 import 'package:flutter/material.dart';
 
 class CustomCard extends StatefulWidget {
@@ -26,9 +27,6 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
   late Animation<double> _gradientAnimation;
   late Animation<Color?> _buttonGradientAnimation;
   late Animation<Color?> _flameAnimation;
-
-  Offset _dragOffset = Offset.zero;
-  double _scale = 1.0;
 
   @override
   void initState() {
@@ -171,40 +169,34 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
     return '${address.substring(0, 6)}...${address.substring(address.length - 4)}';
   }
 
-  void _handlePanUpdate(DragUpdateDetails details) {
-    setState(() {
-      _dragOffset += details.delta;
-      _scale = 1.0 + (_dragOffset.distance * 0.0005).clamp(0.0, 0.1);
-    });
-  }
+  // void _handlePanUpdate(DragUpdateDetails details) {
+  //   setState(() {
+  //     _dragOffset += details.delta;
+  //     _scale = 1.0 + (_dragOffset.distance * 0.0005).clamp(0.0, 0.1);
+  //   });
+  // }
 
-  void _handlePanEnd(DragEndDetails details) {
-    _stretchController.forward(from: 0).then((_) {
-      setState(() {
-        _dragOffset = Offset.zero;
-        _scale = 1.0;
-      });
-    });
-  }
+  // void _handlePanEnd(DragEndDetails details) {
+  //   _stretchController.forward(from: 0).then((_) {
+  //     setState(() {
+  //       _dragOffset = Offset.zero;
+  //       _scale = 1.0;
+  //     });
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onPanUpdate: _handlePanUpdate,
-      onPanEnd: _handlePanEnd,
+      // onPanUpdate: _handlePanUpdate,
+      // onPanEnd: _handlePanEnd,
       child: AnimatedBuilder(
         animation: Listenable.merge([
           _stretchController,
           _floatController,
         ]),
         builder: (context, child) {
-          return Transform.translate(
-            offset: _dragOffset,
-            child: Transform.scale(
-              scale: _scale * (1 - _stretchController.value * 0.1),
-              child: _buildCard(),
-            ),
-          );
+          return _buildCard();
         },
       ),
     );
@@ -212,19 +204,19 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
 
   Widget _buildCard() {
     return Container(
-      width: MediaQuery.of(context).size.width * 0.95,
-      height: 230,
+      width: MediaQuery.of(context).size.width * 0.85,
+      height: 200,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            spreadRadius: 2,
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(16),
+        // boxShadow: [
+        //   BoxShadow(
+        //     color: Colors.black.withOpacity(0.3),
+        //     spreadRadius: 2,
+        //     blurRadius: 8,
+        //     offset: const Offset(0, 4),
+        //   ),
+        // ],
         gradient: LinearGradient(
           begin: Alignment(_gradientAnimation.value, -1),
           end: Alignment(-_gradientAnimation.value, 1),
@@ -262,9 +254,9 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
               widget.name,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 36,
+                fontSize: 24,
                 fontWeight: FontWeight.w600,
-                letterSpacing: 1,
+                letterSpacing: 1.5,
               ),
             ),
             _buildCustomButton(),
@@ -314,6 +306,10 @@ class _CustomCardState extends State<CustomCard> with TickerProviderStateMixin {
           child: TextButton(
             onPressed: () {
               // Handle Withdraw action
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const WalletScreen()),
+              );
             },
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),

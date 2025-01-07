@@ -3,6 +3,7 @@
 import 'dart:math';
 
 import 'package:AAG/LeagueScreen/opponentmatchmaking.dart';
+import 'package:AAG/PublishGameScreen/gamescreen2.dart';
 import 'package:flutter/material.dart';
 import 'package:AAG/PublishGameScreen/publishgamescreen.dart';
 import 'package:AAG/PublishGameScreen/scheduledgamescreen.dart';
@@ -10,14 +11,14 @@ import 'package:AAG/tobeadded/gradient_button.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
-class LeagueScreen extends StatefulWidget {
-  const LeagueScreen({super.key});
+class PublishLeagueScreen extends StatefulWidget {
+  const PublishLeagueScreen({super.key});
 
   @override
-  LeagueScreenState createState() => LeagueScreenState();
+  PublishLeagueScreenState createState() => PublishLeagueScreenState();
 }
 
-class LeagueScreenState extends State<LeagueScreen>
+class PublishLeagueScreenState extends State<PublishLeagueScreen>
     with TickerProviderStateMixin {
   late TabController _tabController;
   int selectedThemeIndex = -1;
@@ -31,20 +32,28 @@ class LeagueScreenState extends State<LeagueScreen>
   late Animation<double> _scaleAnimation;
   late Animation<Color?> _colorAnimation1;
   late Animation<Color?> _colorAnimation2;
-
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    // Initialize tab controller with same length as Ludo screen
+    _tabController = TabController(length: 2, vsync: this)
+      ..addListener(() {
+        setState(() {}); // Rebuild on tab change
+      });
 
     _gradientAnimationController = AnimationController(
       duration: const Duration(seconds: 3),
       vsync: this,
     )..repeat();
 
+    // Setup animations with same configurations
+    _setupAnimations();
+  }
+
+  void _setupAnimations() {
     _gradientAnimation = Tween<double>(
       begin: 0.0,
-      end: 2 * 3.14159, // Full rotation in radians
+      end: 2 * 3.14159,
     ).animate(CurvedAnimation(
       parent: _gradientAnimationController,
       curve: Curves.easeInOutCubic,
@@ -93,38 +102,31 @@ class LeagueScreenState extends State<LeagueScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
+      extendBodyBehindAppBar: false,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
         ),
-        title: const Text(
-          'LEAGUES',
-          style: TextStyle(color: Colors.white),
+        title: Text(
+          "LEAGUES",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
+        backgroundColor: const Color.fromARGB(255, 102, 44, 144),
       ),
       body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('lib/images/idkbg.jpg'),
-            fit: BoxFit.cover,
-          ),
-        ),
+        color: Colors.white,
         child: Column(
           children: [
-            const SizedBox(height: 90),
+            // Custom AppBar section
             TabBar(
               controller: _tabController,
               indicatorColor: Colors.orange,
               indicatorWeight: 3,
               labelColor: Colors.orange,
-              unselectedLabelColor: Colors.white,
-              onTap: (_) {
-                _tabController.index = _tabController.previousIndex;
-              },
+              unselectedLabelColor: Colors.black,
               tabs: const [
                 Tab(text: 'THEMES'),
                 Tab(text: 'PRIZE POOL'),
@@ -155,7 +157,9 @@ class LeagueScreenState extends State<LeagueScreen>
           children: [
             Expanded(
               child: Padding(
-                padding: EdgeInsets.all(constraints.maxWidth * 0.04),
+                padding: EdgeInsets.symmetric(
+                    horizontal: constraints.maxWidth * 0.04,
+                    vertical: constraints.maxWidth * 0.08),
                 child: GridView.builder(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: constraints.maxWidth > 600 ? 4 : 3,
@@ -173,18 +177,18 @@ class LeagueScreenState extends State<LeagueScreen>
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: selectedThemeIndex == index
-                                ? Colors.purple
-                                : Colors.transparent,
-                            width: 2,
+                                ? Color.fromRGBO(255, 146, 29, 1)
+                                : Color.fromARGB(255, 102, 44, 144),
+                            width: selectedThemeIndex == index ? 4 : 1,
                           ),
                         ),
                         child: Stack(
                           children: [
                             ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(4),
                               child: Image.asset(
                                 'lib/images/jungle.jpeg',
                                 fit: BoxFit.cover,
@@ -192,6 +196,7 @@ class LeagueScreenState extends State<LeagueScreen>
                                 height: double.infinity,
                               ),
                             ),
+
                             Positioned(
                               top: 0,
                               left: 0,
@@ -221,21 +226,29 @@ class LeagueScreenState extends State<LeagueScreen>
                                 ),
                               ),
                             ),
+                            // Lock overlay for locked themes
                             if (index >= 2)
                               Container(
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(8),
                                   color: Colors.black.withOpacity(0.7),
                                 ),
-                                child: const Center(
-                                  child: Icon(Icons.lock,
-                                      color: Colors.white, size: 24),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.lock,
+                                        color: Colors.white, size: 20),
+                                    const SizedBox(
+                                      height: 5,
+                                    ),
+                                    _buildHeader(constraints),
+                                  ],
                                 ),
                               ),
                           ],
                         ),
                       ),
-                    ).animate().fadeIn(delay: (100 * index).ms).scale();
+                    );
                   },
                 ),
               ),
@@ -268,7 +281,9 @@ class LeagueScreenState extends State<LeagueScreen>
           children: [
             Expanded(
               child: Padding(
-                padding: EdgeInsets.all(constraints.maxWidth * 0.04),
+                padding: EdgeInsets.symmetric(
+                    horizontal: constraints.maxWidth * 0.04,
+                    vertical: constraints.maxWidth * 0.08),
                 child: GridView.builder(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: constraints.maxWidth > 600 ? 4 : 3,
@@ -286,7 +301,7 @@ class LeagueScreenState extends State<LeagueScreen>
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: selectedFeeIndex == index
                                 ? Colors.orange
@@ -297,7 +312,7 @@ class LeagueScreenState extends State<LeagueScreen>
                         child: Stack(
                           children: [
                             ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(8),
                               child: Image.asset(
                                 'lib/images/g1.png',
                                 fit: BoxFit.cover,
@@ -313,7 +328,7 @@ class LeagueScreenState extends State<LeagueScreen>
                                     colors: [Colors.orange, Colors.deepOrange],
                                   ),
                                   borderRadius: BorderRadius.vertical(
-                                    bottom: Radius.circular(10),
+                                    bottom: Radius.circular(4),
                                   ),
                                 ),
                                 padding:
@@ -354,8 +369,10 @@ class LeagueScreenState extends State<LeagueScreen>
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) =>
-                                  const OpponentSearchScreen()),
+                              builder: (context) => OpponentSearchScreen(
+                                    poolPrize:
+                                        (selectedFeeIndex + 2).toString(),
+                                  )),
                         );
                       },
                       text: 'Next',
@@ -370,124 +387,44 @@ class LeagueScreenState extends State<LeagueScreen>
       },
     );
   }
+
+  Widget _buildHeader(BoxConstraints constraints) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Container(
+          height: 2,
+          margin: const EdgeInsets.symmetric(horizontal: 0),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color.fromARGB(255, 102, 44, 144),
+                Colors.orange.withOpacity(0.7),
+                Color.fromARGB(255, 102, 44, 144),
+              ],
+            ),
+          ),
+        ),
+        CustomPaint(
+          painter: HexagonPainter(
+              color: Color.fromARGB(255, 102, 44, 144),
+              gridAspectRatio: constraints.maxWidth > 600 ? 0.7 : 0.5,
+              constraintMaxWidth: constraints.maxWidth),
+          child: const Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 0, vertical: 5),
+              child: Text(
+                'Locked',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  letterSpacing: 1,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }
-
-// class CustomButton extends StatelessWidget {
-//   final VoidCallback onTap;
-//   final String text;
-
-//   const CustomButton({
-//     super.key,
-//     required this.onTap,
-//     required this.text,
-//   });
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return GestureDetector(
-//       onTap: onTap,
-//       child: Container(
-//         padding: const EdgeInsets.symmetric(vertical: 12),
-//         decoration: BoxDecoration(
-//           gradient: const LinearGradient(
-//             colors: [Colors.purple, Colors.deepPurple],
-//           ),
-//           borderRadius: BorderRadius.circular(8),
-//           boxShadow: [
-//             BoxShadow(
-//               color: Colors.purple.withOpacity(0.3),
-//               spreadRadius: 1,
-//               blurRadius: 4,
-//               offset: const Offset(0, 2),
-//             ),
-//           ],
-//         ),
-//         child: Center(
-//           child: Text(
-//             text,
-//             style: const TextStyle(
-//               color: Colors.white,
-//               fontSize: 16,
-//               fontWeight: FontWeight.bold,
-//             ),
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-// class ComplexGradientPainter extends CustomPainter {
-//   final Animation<double> animation;
-//   final Animation<double> rotationAnimation;
-//   final Animation<double> scaleAnimation;
-//   final Animation<Color?> colorAnimation1;
-//   final Animation<Color?> colorAnimation2;
-
-//   ComplexGradientPainter({
-//     required this.animation,
-//     required this.rotationAnimation,
-//     required this.scaleAnimation,
-//     required this.colorAnimation1,
-//     required this.colorAnimation2,
-//   });
-
-//   @override
-//   void paint(Canvas canvas, Size size) {
-//     final Rect rect = Offset.zero & size;
-//     final center = Offset(size.width / 2, size.height / 2);
-
-//     // Create multiple gradient layers
-//     for (int i = 0; i < 3; i++) {
-//       final double phase = animation.value + (i * 3.14159 / 3);
-//       final double scale = scaleAnimation.value + (i * 0.02);
-
-//       final Gradient gradient = RadialGradient(
-//         center: Alignment(
-//           cos(phase) * 0.5,
-//           sin(phase) * 0.5,
-//         ),
-//         colors: [
-//           colorAnimation1.value ?? Colors.purple[900]!,
-//           colorAnimation2.value ?? Colors.deepPurple[700]!,
-//           Colors.purple[500]!.withOpacity(0.5),
-//           Colors.deepPurple[900]!.withOpacity(0.8),
-//         ],
-//         stops: const [0.0, 0.3, 0.6, 1.0],
-//         radius: 1.5 * scale,
-//       );
-
-//       final Paint paint = Paint()
-//         ..shader = gradient.createShader(rect)
-//         ..blendMode = BlendMode.overlay;
-
-//       canvas.save();
-//       canvas.translate(center.dx, center.dy);
-//       canvas.rotate(rotationAnimation.value * 0.2 * i);
-//       canvas.scale(scale);
-//       canvas.translate(-center.dx, -center.dy);
-//       canvas.drawRect(rect, paint);
-//       canvas.restore();
-//     }
-
-//     // Add metallic shine effect
-//     final Paint shinePaint = Paint()
-//       ..shader = LinearGradient(
-//         begin: Alignment(cos(animation.value), sin(animation.value)),
-//         end: Alignment(
-//             cos(animation.value + 3.14159), sin(animation.value + 3.14159)),
-//         colors: [
-//           Colors.white.withOpacity(0.0),
-//           Colors.white.withOpacity(0.2),
-//           Colors.white.withOpacity(0.0),
-//         ],
-//         stops: const [0.0, 0.5, 1.0],
-//       ).createShader(rect)
-//       ..blendMode = BlendMode.overlay;
-
-//     canvas.drawRect(rect, shinePaint);
-//   }
-
-//   @override
-//   bool shouldRepaint(ComplexGradientPainter oldDelegate) => true;
-// }

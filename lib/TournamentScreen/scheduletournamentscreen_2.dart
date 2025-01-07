@@ -1,8 +1,9 @@
-import 'dart:math';
-import 'package:AAG/tobeadded/gradient_button.dart';
+import 'package:AAG/HomeScreen/new_homescreen.dart';
+import 'package:AAG/Pages/animated_pulsating_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
-import 'dart:ui';
 
 class EditableScheduledTournamentScreen extends StatefulWidget {
   const EditableScheduledTournamentScreen({super.key});
@@ -14,246 +15,187 @@ class EditableScheduledTournamentScreen extends StatefulWidget {
 
 class _EditableScheduledTournamentScreenState
     extends State<EditableScheduledTournamentScreen>
-    with TickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _scaleAnimation;
-  bool _visible = false;
-
-  // Animation controllers for schedule popup
-  late AnimationController _gradientAnimationController;
-  late Animation<double> _gradientAnimation;
-  late Animation<double> _rotationAnimation;
-  late Animation<double> _popupScaleAnimation;
-  late Animation<Color?> _colorAnimation1;
-  late Animation<Color?> _colorAnimation2;
+    with SingleTickerProviderStateMixin {
+  bool isCopied = false;
+  final String gameLink = 'https://game.example.com/jw2-zesm-pzb';
   String? scheduledInfo;
+
+  late AnimationController _gradientAnimationController;
 
   @override
   void initState() {
     super.initState();
-
-    // Initialize Animation Controller for main screen
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 1),
-    )..repeat(reverse: true);
-
-    _scaleAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-    );
-
-    // Initialize Animation Controller for schedule popup
     _gradientAnimationController = AnimationController(
       duration: const Duration(seconds: 3),
       vsync: this,
     )..repeat();
+  }
 
-    _gradientAnimation = Tween<double>(
-      begin: -1.0,
-      end: 2.0,
-    ).animate(_gradientAnimationController);
+  @override
+  void dispose() {
+    _gradientAnimationController.dispose();
+    super.dispose();
+  }
 
-    _rotationAnimation = Tween<double>(
-      begin: 0.0,
-      end: 2.0 * pi, // Using pi constant instead of magic number
-    ).animate(_gradientAnimationController);
-
-    _popupScaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.2,
-    ).animate(_gradientAnimationController);
-
-    _colorAnimation1 = ColorTween(
-      begin: Colors.purple,
-      end: Colors.blue,
-    ).animate(_gradientAnimationController);
-
-    _colorAnimation2 = ColorTween(
-      begin: Colors.blue,
-      end: Colors.purple,
-    ).animate(_gradientAnimationController);
-
-    // Delay to trigger fade-in effect
-    Future.delayed(const Duration(milliseconds: 300), () {
+  void _copyLink() {
+    Clipboard.setData(ClipboardData(text: gameLink));
+    setState(() {
+      isCopied = true;
+    });
+    Future.delayed(Duration(seconds: 2), () {
       if (mounted) {
-        // Add mounted check for safety
         setState(() {
-          _visible = true;
+          isCopied = false;
         });
       }
     });
   }
 
-  @override
-  void dispose() {
-    _animationController.dispose();
-    _gradientAnimationController.dispose();
-    super.dispose();
-  }
-
   Future<void> _showSchedulePopup() async {
     DateTime? selectedDate;
     TimeOfDay? selectedTime;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: const Color.fromARGB(255, 102, 44, 144),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
       ),
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return AnimatedBuilder(
-              animation: _gradientAnimationController,
-              builder: (context, child) {
-                return ClipRRect(
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(25)),
-                  child: CustomPaint(
-                    painter: ComplexGradientPainter(
-                      animation: _gradientAnimation,
-                      rotationAnimation: _rotationAnimation,
-                      scaleAnimation: _popupScaleAnimation,
-                      colorAnimation1: _colorAnimation1,
-                      colorAnimation2: _colorAnimation2,
-                    ),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(25)),
-                          color: Colors.black.withOpacity(0.1),
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(20, 20, 20,
-                              MediaQuery.of(context).viewInsets.bottom + 20),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Text(
-                                'Schedule Game',
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                  shadows: [
-                                    Shadow(
-                                      blurRadius: 8.0,
-                                      color: Colors.black26,
-                                      offset: Offset(2.0, 2.0),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                margin:
-                                    const EdgeInsets.symmetric(vertical: 15),
-                                height: 1,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin:
-                                        Alignment(_gradientAnimation.value, 0),
-                                    end:
-                                        Alignment(-_gradientAnimation.value, 0),
-                                    colors: const [
-                                      Colors.white24,
-                                      Colors.white,
-                                      Colors.white24,
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              ListTile(
-                                title: const Text(
-                                  'Select Date',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                subtitle: Text(
-                                  selectedDate != null
-                                      ? DateFormat('EEE, MMM d, yyyy')
-                                          .format(selectedDate!)
-                                      : 'Choose a date',
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(0.7),
-                                  ),
-                                ),
-                                trailing: Icon(
-                                  Icons.calendar_today,
-                                  color: Colors.white.withOpacity(0.9),
-                                ),
-                                onTap: () async {
-                                  DateTime? pickedDate = await showDatePicker(
-                                    context: context,
-                                    initialDate: DateTime.now(),
-                                    firstDate: DateTime.now(),
-                                    lastDate: DateTime(2101),
-                                  );
-                                  if (pickedDate != null) {
-                                    setState(() {
-                                      selectedDate = pickedDate;
-                                    });
-                                  }
-                                },
-                              ),
-                              ListTile(
-                                title: const Text(
-                                  'Select Time',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                subtitle: Text(
-                                  selectedTime != null
-                                      ? selectedTime!.format(context)
-                                      : 'Choose a time',
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(0.7),
-                                  ),
-                                ),
-                                trailing: Icon(
-                                  Icons.access_time,
-                                  color: Colors.white.withOpacity(0.9),
-                                ),
-                                onTap: () async {
-                                  TimeOfDay? pickedTime = await showTimePicker(
-                                    context: context,
-                                    initialTime: TimeOfDay.now(),
-                                  );
-                                  if (pickedTime != null) {
-                                    setState(() {
-                                      selectedTime = pickedTime;
-                                    });
-                                  }
-                                },
-                              ),
-                              const SizedBox(height: 20),
-                              ElevatedButton(
-                                onPressed: () {
-                                  if (selectedDate != null &&
-                                      selectedTime != null) {
-                                    setState(() {
-                                      scheduledInfo =
-                                          "Scheduled on ${DateFormat('EEE, MMM d, yyyy').format(selectedDate!)} at ${selectedTime!.format(context)}";
-                                    });
-                                    Navigator.pop(context);
-                                  }
-                                },
-                                child: const Text('Schedule'),
-                              ),
-                            ],
-                          ),
-                        ),
+            return Container(
+              decoration: BoxDecoration(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(25)),
+              ),
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                    20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Schedule Game',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
                     ),
-                  ),
-                );
-              },
+                    Container(
+                      margin: const EdgeInsets.symmetric(vertical: 15),
+                      height: 1,
+                      color: Colors.white24,
+                    ),
+                    ListTile(
+                      title: const Text(
+                        'Select Date',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            selectedDate != null
+                                ? DateFormat('EEE, MMM d, yyyy')
+                                    .format(selectedDate!)
+                                : 'Choose a date',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.7),
+                            ),
+                          ),
+                        ],
+                      ),
+                      trailing: Icon(
+                        Icons.calendar_today,
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                      onTap: () async {
+                        DateTime? pickedDate = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime(2101),
+                        );
+                        if (pickedDate != null) {
+                          setState(() {
+                            selectedDate = pickedDate;
+                          });
+                        }
+                      },
+                    ),
+                    ListTile(
+                      title: const Text(
+                        'Select Time',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            selectedTime != null
+                                ? selectedTime!.format(context)
+                                : 'Choose a time',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.7),
+                            ),
+                          ),
+                        ],
+                      ),
+                      trailing: Icon(
+                        Icons.access_time,
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                      onTap: () async {
+                        TimeOfDay? pickedTime = await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay.now(),
+                        );
+                        if (pickedTime != null) {
+                          setState(() {
+                            selectedTime = pickedTime;
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (selectedDate != null && selectedTime != null) {
+                          setState(() {
+                            scheduledInfo =
+                                "Scheduled on ${DateFormat('EEE, MMM d, yyyy').format(selectedDate!)} at ${selectedTime!.format(context)}";
+                          });
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const EditableScheduledTournamentScreen(),
+                            ),
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.black,
+                        backgroundColor: Colors.white,
+                        minimumSize: Size(double.infinity, 48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text('Schedule'),
+                    ),
+                  ],
+                ),
+              ),
             );
           },
         );
@@ -264,120 +206,309 @@ class _EditableScheduledTournamentScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
         elevation: 0,
+        backgroundColor: Colors.white,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          icon: FaIcon(FontAwesomeIcons.arrowLeft, color: Colors.grey[700]),
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => NewHomescreen(),
+              ),
+            );
+          },
         ),
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('lib/images/idkbg.jpg'),
-            fit: BoxFit.cover,
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(1.0),
+          child: Container(
+            color: Colors.grey[300],
+            height: 1.0,
           ),
         ),
+      ),
+      body: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        padding: EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           children: [
-            Expanded(
-              flex: 3,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    AnimatedOpacity(
-                      opacity: _visible ? 1.0 : 0.0,
-                      duration: const Duration(seconds: 1),
-                      child: ScaleTransition(
-                        scale: _scaleAnimation,
-                        child: Image.asset(
-                          'lib/images/war.png',
-                          height: 306,
-                          width: 311,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    const Center(
-                      child: Text(
-                        'Your Tournament has\n  been  Scheduled',
-                        style: TextStyle(
-                          color: Colors.orange,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
+            AnimatedPulseImage(
+              imagePath: 'lib/images/war.png',
+              // Optional: customize parameters
+              height: 250,
+              width: 250,
+              animationDuration: Duration(seconds: 2),
+            ),
+            SizedBox(height: 32),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Tournament Successfully',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[800],
+                  ),
+                ),
+                Text(
+                  'Scheduled',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[800],
+                  ),
+                ),
+              ],
+            ),
+            if (scheduledInfo != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Text(
+                  scheduledInfo!,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ),
+            SizedBox(height: 32),
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                gameLink,
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
-            Expanded(
-              flex: 2,
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Color.fromRGBO(30, 15, 50, 0.85),
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
+            SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _copyLink,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromRGBO(255, 146, 29, 1),
+                minimumSize: Size(double.infinity, 48),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                isCopied ? 'Copied!' : 'Copy Link',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: _showSchedulePopup,
+              icon: Icon(Icons.edit_calendar_outlined, size: 16),
+              label: Text('Edit Schedule'),
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.grey[700],
+                backgroundColor: Colors.grey[100],
+                minimumSize: Size(double.infinity, 48),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+            SizedBox(height: 48),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Container(
+                    height: 40,
+                    width: 40,
+                    child: Image.asset(
+                      'lib/images/insta.png',
+                      fit: BoxFit.contain,
+                    )),
+                Container(
+                    height: 50,
+                    width: 50,
+                    child: Image.asset(
+                      'lib/images/whatsapp.png',
+                      fit: BoxFit.contain,
+                    )),
+                Container(
+                    height: 40,
+                    width: 40,
+                    child: Image.asset(
+                      'lib/images/f_book.png',
+                      fit: BoxFit.contain,
+                    )),
+                Container(
+                    height: 40,
+                    width: 40,
+                    child: Image.asset(
+                      'lib/images/X.png',
+                      fit: BoxFit.contain,
+                    )),
+                // _socialLoginButton(Icons.g_mobiledata, Colors.black),
+                // _socialLoginButton(Icons.apple, Colors.black),
+                // _socialLoginButton(Icons.f_book, Colors.black),
+              ],
+            ),
+            SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Share the published league link',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[500],
                   ),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(
-                            right: 20, bottom: 10, top: 10),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            GestureDetector(
-                              onTap: _showSchedulePopup,
-                              child: Row(children: [
-                                const Text(
-                                  'Edit',
-                                  style: TextStyle(
-                                      color: Colors.orange, fontSize: 14),
-                                ),
-                                const Icon(
-                                  Icons.edit_calendar_outlined,
-                                  color: Colors.orange,
-                                  size: 14,
-                                ),
-                              ]),
-                            )
-                          ],
-                        ),
-                      ),
-                      _buildTextField('https://game.aag.com/jw2-zesm-pzb'),
-                      CustomButton(
-                        onTap: () {},
-                        text: 'COPY',
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Image.asset('lib/images/Facebook.png', height: 80),
-                          Image.asset('lib/images/Instagram.png', height: 80),
-                          Image.asset('lib/images/Elemento.png', height: 80),
-                          Image.asset('lib/images/Snapchat.png', height: 80),
-                        ],
-                      ),
-                      const Text(
-                        'Share the special invite link',
-                        style: TextStyle(
-                          color: Colors.white24,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
+                const SizedBox(
+                  width: 8,
                 ),
+                GestureDetector(
+                  onTap: () => _showSharePopup(context),
+                  child: Container(
+                    width: 22,
+                    height: 22,
+                    child: Image.asset(
+                      'lib/images/ReferEarn.png',
+                      fit: BoxFit.contain,
+                      color: Colors.black,
+                    ),
+                  ),
+                )
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showSharePopup(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 360;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle bar
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+
+            // Apps row
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildShareOption(
+                    icon: 'lib/images/whatsapp_icon.png',
+                    label: 'WhatsApp',
+                    onTap: () {
+                      // Add WhatsApp sharing logic
+                      Navigator.pop(context);
+                    },
+                  ),
+                  _buildShareOption(
+                    icon: 'lib/images/notion_icon.png',
+                    label: 'Notion',
+                    onTap: () {
+                      // Add Notion sharing logic
+                      Navigator.pop(context);
+                    },
+                  ),
+                  _buildShareOption(
+                    icon: 'lib/images/f_book.png',
+                    label: 'Facebook',
+                    onTap: () {
+                      // Add Facebook sharing logic
+                      Navigator.pop(context);
+                    },
+                  ),
+                  _buildShareOption(
+                    icon: 'lib/images/more_icon.png',
+                    label: 'More',
+                    onTap: () {
+                      // Show more sharing options
+                      Navigator.pop(context);
+                    },
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+            const Divider(),
+            const SizedBox(height: 10),
+
+            // Actions row
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildActionOption(
+                    icon: Icons.screenshot_outlined,
+                    label: 'Screenshot',
+                    onTap: () {
+                      // Add screenshot logic
+                      Navigator.pop(context);
+                    },
+                  ),
+                  _buildActionOption(
+                    icon: Icons.crop,
+                    label: 'Long\nScreenshot',
+                    onTap: () {
+                      // Add long screenshot logic
+                      Navigator.pop(context);
+                    },
+                  ),
+                  _buildActionOption(
+                    icon: Icons.link,
+                    label: 'Copy link',
+                    onTap: () {
+                      // Add copy link logic
+                      Navigator.pop(context);
+                    },
+                  ),
+                  _buildActionOption(
+                    icon: Icons.devices,
+                    label: 'Send to your\ndevices',
+                    onTap: () {
+                      // Add send to devices logic
+                      Navigator.pop(context);
+                    },
+                  ),
+                  _buildActionOption(
+                    icon: Icons.qr_code,
+                    label: 'QR',
+                    onTap: () {
+                      // Add QR code logic
+                      Navigator.pop(context);
+                    },
+                  ),
+                ],
               ),
             ),
           ],
@@ -386,34 +517,91 @@ class _EditableScheduledTournamentScreenState
     );
   }
 
-  Widget _buildTextField(String hint) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 15),
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15),
-        color: const Color.fromRGBO(22, 13, 37, 1),
-        border: const Border(
-          bottom: BorderSide(
-            color: Color.fromARGB(255, 145, 30, 233),
-            width: 2.0,
-          ),
+  Widget _buildShareOption({
+    required String icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 80,
+        margin: const EdgeInsets.symmetric(horizontal: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 50,
+              height: 50,
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Image.asset(
+                icon,
+                width: 24,
+                height: 24,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 12,
+                color: Colors.black87,
+              ),
+            ),
+          ],
         ),
       ),
-      child: TextField(
-        enabled: false,
-        style: const TextStyle(color: Colors.white),
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: const TextStyle(color: Colors.white70),
-          border: InputBorder.none,
+    );
+  }
+
+  Widget _buildActionOption({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 80,
+        margin: const EdgeInsets.symmetric(horizontal: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon,
+                size: 24,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 12,
+                color: Colors.black87,
+              ),
+              maxLines: 2,
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-// Custom Painter for gradient effects
 class ComplexGradientPainter extends CustomPainter {
   final Animation<double> animation;
   final Animation<double> rotationAnimation;
@@ -431,58 +619,24 @@ class ComplexGradientPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Rect rect = Offset.zero & size;
-    final center = Offset(size.width / 2, size.height / 2);
-
-    // Create multiple gradient layers
-    for (int i = 0; i < 3; i++) {
-      final double phase = animation.value + (i * 3.14159 / 3);
-      final double scale = scaleAnimation.value + (i * 0.02);
-
-      final Gradient gradient = RadialGradient(
-        center: Alignment(
-          cos(phase) * 0.5,
-          sin(phase) * 0.5,
-        ),
-        colors: [
-          colorAnimation1.value ?? Colors.purple[900]!,
-          colorAnimation2.value ?? Colors.deepPurple[700]!,
-          Colors.purple[500]!.withOpacity(0.5),
-          Colors.deepPurple[900]!.withOpacity(0.8),
-        ],
-        stops: const [0.0, 0.3, 0.6, 1.0],
-        radius: 1.5 * scale,
-      );
-
-      final Paint paint = Paint()
-        ..shader = gradient.createShader(rect)
-        ..blendMode = BlendMode.overlay;
-
-      canvas.save();
-      canvas.translate(center.dx, center.dy);
-      canvas.rotate(rotationAnimation.value * 0.2 * i);
-      canvas.scale(scale);
-      canvas.translate(-center.dx, -center.dy);
-      canvas.drawRect(rect, paint);
-      canvas.restore();
-    }
-
-    // Add metallic shine effect
-    final Paint shinePaint = Paint()
+    final Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
+    final Paint paint = Paint()
       ..shader = LinearGradient(
-        begin: Alignment(cos(animation.value), sin(animation.value)),
-        end: Alignment(
-            cos(animation.value + 3.14159), sin(animation.value + 3.14159)),
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
         colors: [
-          Colors.white.withOpacity(0.0),
-          Colors.white.withOpacity(0.2),
-          Colors.white.withOpacity(0.0),
+          colorAnimation1.value ?? Colors.blue,
+          colorAnimation2.value ?? Colors.purple,
         ],
-        stops: const [0.0, 0.5, 1.0],
-      ).createShader(rect)
-      ..blendMode = BlendMode.overlay;
+      ).createShader(rect);
 
-    canvas.drawRect(rect, shinePaint);
+    canvas.save();
+    canvas.translate(size.width / 2, size.height / 2);
+    canvas.rotate(rotationAnimation.value);
+    canvas.scale(scaleAnimation.value);
+    canvas.translate(-size.width / 2, -size.height / 2);
+    canvas.drawRect(rect, paint);
+    canvas.restore();
   }
 
   @override

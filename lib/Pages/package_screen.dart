@@ -1,725 +1,701 @@
-// ignore_for_file: unused_import
-
-import 'package:AAG/tobeadded/movingbutton.dart';
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+// subscription_screen.dart
 import 'package:flutter/material.dart';
-import 'package:AAG/Pages/loginsignup.dart';
+
 import 'package:AAG/Pages/otp_veri.dart';
-// import 'package:rive/rive.dart' hide LinearGradient, Image;
+import 'package:AAG/Pages/signup.dart';
 
-import 'package:AAG/tobeadded/rivebutton.dart';
+import 'subscription_model.dart';
 
-class PackageScreen extends StatelessWidget {
+class PackageScreen extends StatefulWidget {
+  final String mobilenumber;
+
   const PackageScreen({
     super.key,
+    required this.mobilenumber,
   });
+
+  @override
+  State<PackageScreen> createState() => _PackageScreenState();
+}
+
+class _PackageScreenState extends State<PackageScreen> {
+  bool isMonthly = true;
+
+  final List<SubscriptionPlan> plans = [
+    SubscriptionPlan(
+      name: 'Standard',
+      description: 'For individual users',
+      monthlyPrice: 9990,
+      annualPrice: 99900,
+      gradientColor1: const Color.fromARGB(255, 31, 63, 173),
+      gradientColor2: const Color.fromARGB(255, 49, 46, 130),
+      features: [
+        'Must Have 100K+ Followers.',
+        'Upto 4 Themes/Skins for the game',
+        'Monthly Feature Slots for the games.',
+        'Performance-Based Event Unlock.',
+        'Referral Bonus',
+        'Analytics Dashboard',
+        'Priority Support',
+        'Unique Game invite link.',
+        'Limited Games Access.'
+      ],
+    ),
+    SubscriptionPlan(
+      name: 'Elite',
+      description: 'Perfect for growing teams',
+      monthlyPrice: 19900,
+      annualPrice: 199900,
+      isPopular: true,
+      gradientColor1: const Color.fromARGB(255, 123, 34, 201),
+      gradientColor2: const Color.fromARGB(255, 88, 28, 136),
+      features: [
+        'Must Have 500K+ Followers.',
+        'Updated Daily Game Publish Limit.',
+        'Upto 6 Themes/Skins for the game',
+        'Daily/Monthly Feature Slots for the games.',
+        'Performance-Based Events Unlock.',
+        'Referral Bonus',
+        'Analytics Dashboard',
+        'Priority Support',
+        'Unique Game invite link.',
+        'Daily/ Weekly League Access option.',
+        'Limited Time Tournament Access option.',
+        'Weekly/Monthly Promotional Activities.',
+        'Updated Games Access.',
+      ],
+    ),
+    SubscriptionPlan(
+      name: 'Pro',
+      description: 'For professional teams',
+      monthlyPrice: 29900,
+      annualPrice: 299900,
+      gradientColor1: const Color.fromARGB(255, 201, 137, 4),
+      gradientColor2: const Color.fromARGB(255, 134, 78, 14),
+      features: [
+        'Must-Have 1M+ Followers.',
+        'Updated Daily Game Publish Limit.',
+        'Upto 12 Themes/Skins for the game',
+        'Daily/Weekly/Monthly Feature Slots for the games.',
+        'Daily/ Weekly/Monthly League Access option.',
+        'Daily/Weekly/Monthly Tournament Access option.',
+        'Daily/Weekly/Monthly Promotional Activities.',
+        'Special Events Access.',
+        'Referral Bonus',
+        'Analytics Dashboard',
+        'Customized Game invite link.',
+        'All Platform Games Access.',
+        'Priority Access to Beta Features.',
+        'Additional Event Customization Options',
+        'Dedicated Relationship Manager'
+      ],
+    ),
+    SubscriptionPlan(
+      name: 'Enterprise',
+      description: 'Custom solutions',
+      monthlyPrice: 39900,
+      annualPrice: 399900,
+      gradientColor1: const Color.fromARGB(255, 15, 118, 110),
+      gradientColor2: const Color.fromARGB(255, 11, 62, 58),
+      features: [
+        'Customized Features and Plan Details',
+        'Custom Plans For Businesses Only',
+        '10x Return',
+      ],
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          Image.asset(
-            'lib/images/idkbg.jpg',
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => SignUpPage(),
+              ),
+            );
+          },
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        title: Image.asset(
+          'lib/images/aag.png',
+          height: 40,
+        ),
+      ),
+
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              _buildToggle(),
+              const SizedBox(height: 24),
+              _buildSubscriptionCards(),
+              // _buildTrustedCompanies(),
+              // ElevatedButton(
+              //   onPressed: () {},
+              //   style: ElevatedButton.styleFrom(
+              //     backgroundColor: Colors.blue,
+              //     shape: RoundedRectangleBorder(
+              //       borderRadius: BorderRadius.circular(8),
+              //     ),
+              //     padding: const EdgeInsets.symmetric(vertical: 16),
+              //   ),
+              //   child: const Text(
+              //     "Contact Sales",
+              //     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              //   ),
+              // ),
+              const SizedBox(height: 10),
+              const Text(
+                "Need help choosing? Contact our team for a consultation",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+            ],
           ),
-          SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back, color: Colors.white),
-                        onPressed: () =>
-                            Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) => const LoginScreen(),
-                        )),
-                      ),
-                      const SizedBox(width: 16),
-                      const Text(
-                        'SUBSCRIPTION',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+        ),
+      ),
+
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     // Handle chat button press
+      //   },
+      //   child: const Icon(
+      //     Icons.chat,
+      //     color: Colors.black,
+      //   ),
+      // ),
+    );
+  }
+
+  Widget _buildToggle() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildToggleButton('Monthly', isMonthly),
+          _buildToggleButton('Annual', !isMonthly),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToggleButton(String text, bool selected) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          isMonthly = text == 'Monthly';
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected ? Colors.black : Colors.white,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: selected ? Colors.white : Colors.black,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSubscriptionCards() {
+    return Column(
+      children: plans.map((plan) => _buildPlanCard(plan)).toList(),
+    );
+  }
+
+  Widget _buildPlanCard(SubscriptionPlan plan) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 4,
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          if (plan.isPopular)
+            Positioned(
+              top: 40,
+              right: 0,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.green,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text(
+                  'Popular',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
                   ),
                 ),
+              ),
+            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildPlanHeader(plan),
+              const SizedBox(height: 16),
+              _buildFeaturesList(plan),
+              const SizedBox(height: 16),
+              _buildActionButton(plan),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPlanHeader(SubscriptionPlan plan) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              plan.name,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              plan.description,
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+        if (plan.name != 'Enterprise')
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                '₹${isMonthly ? plan.monthlyPrice : plan.annualPrice}',
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                isMonthly ? '/mo' : '/yr',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+          )
+        else
+          const Text(
+            'Custom pricing',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildFeaturesList(SubscriptionPlan plan) {
+    return Column(
+      children: plan.features.take(3).map((feature) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.check_circle,
+                color: Colors.green,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(feature),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildActionButton(SubscriptionPlan plan) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: () => _showPackagePlanBottomSheet(plan),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.black,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        child: const Text(
+          'Explore Plan',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showPackagePlanBottomSheet(SubscriptionPlan plan) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _PackagePlanBottomSheet(
+        title: plan.name,
+        gradientColor1: plan.gradientColor1,
+        gradientColor2: plan.gradientColor2,
+        mobilenumber: widget.mobilenumber,
+        packageFeatures: {
+          plan.name.toLowerCase(): plan.features,
+        },
+      ),
+    );
+  }
+}
+
+// Widget _buildTrustedCompanies() {
+//   return Column(
+//     crossAxisAlignment: CrossAxisAlignment.start,
+//     children: [
+//       const Text(
+//         'Trusted by leading companies',
+//         style: TextStyle(
+//           fontSize: 18,
+//           fontWeight: FontWeight.bold,
+//         ),
+//       ),
+//       const SizedBox(height: 16),
+//       Row(
+//         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//         children: List.generate(
+//           4,
+//           (index) => Container(
+//             width: 80,
+//             height: 40,
+//             color: Colors.grey[300],
+//           ),
+//         ),
+//       ),
+//     ],
+//   );
+// }
+
+class _PackagePlanBottomSheet extends StatefulWidget {
+  final String title;
+  final Color gradientColor1;
+  final Color gradientColor2;
+  final String mobilenumber;
+  final Map<String, List<String>> packageFeatures;
+
+  const _PackagePlanBottomSheet({
+    required this.title,
+    required this.gradientColor1,
+    required this.gradientColor2,
+    required this.mobilenumber,
+    required this.packageFeatures,
+  });
+
+  @override
+  __PackagePlanBottomSheetState createState() =>
+      __PackagePlanBottomSheetState();
+}
+
+class __PackagePlanBottomSheetState extends State<_PackagePlanBottomSheet> {
+  String _selectedPlan = 'monthly';
+
+  List<Widget> _buildFeaturesList(String packageType) {
+    final List<String> features =
+        widget.packageFeatures[packageType.toLowerCase()] ?? [];
+
+    return features
+        .map((feature) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.check, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      feature,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            ))
+        .toList();
+  }
+
+  @override
+  Widget build(
+    BuildContext context,
+  ) {
+    // Get screen height
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return Container(
+      height: screenHeight * 0.75, // 75% of screen height
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [widget.gradientColor1, widget.gradientColor2],
+              ),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Center(
+                        child: Text(
+                          'Subscribe to ${widget.title}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: _selectedPlan == 'monthly' ? 6 : 4,
+                      child: _buildPlanOption(
+                        'Monthly',
+                        ' 799',
+                        'Billed Monthly',
+                        _selectedPlan == 'monthly',
+                        () => setState(() => _selectedPlan = 'monthly'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: _selectedPlan == 'annual' ? 6 : 4,
+                      child: _buildPlanOption(
+                        'Annual',
+                        ' 7,999',
+                        'Billed Annually\nSAVE 33%',
+                        _selectedPlan == 'annual',
+                        () => setState(() => _selectedPlan = 'annual'),
+                      ),
+                    ),
+                  ],
+                ),
                 Expanded(
-                  child: Center(
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        return SingleChildScrollView(
-                          child: Wrap(
-                            spacing: 16,
-                            runSpacing: 16,
-                            alignment: WrapAlignment.center,
-                            children: [
-                              // ₹/month
-                              _buildPackageOption(
-                                context,
-                                'Standard',
-                                '100K+ Followers',
-                                '₹10,000/month',
-                                'month',
-                                const Color.fromARGB(255, 113, 47, 160),
-                                const Color.fromARGB(255, 54, 47, 145),
-                                constraints,
-                              ),
-                              _buildPackageOption(
-                                context,
-                                'Pro',
-                                '500K+ Followers',
-                                '₹20,000/month',
-                                'month',
-                                const Color.fromARGB(255, 239, 38, 209),
-                                const Color.fromARGB(255, 255, 111, 79),
-                                constraints,
-                              ),
-                              _buildPackageOption(
-                                context,
-                                'Elite',
-                                '1M+ Followers',
-                                '₹30,000/month',
-                                'month',
-                                const Color.fromARGB(155, 239, 105, 82),
-                                const Color.fromARGB(155, 255, 249, 71),
-                                constraints,
-                              ),
-                              _buildPackageOption(
-                                context,
-                                'Enterprise',
-                                '100K+ Followers',
-                                'Contact us for details',
-                                'month',
-                                const Color.fromARGB(255, 3, 189, 156),
-                                const Color.fromARGB(255, 3, 87, 12),
-                                constraints,
-                              ),
-                            ],
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(12),
+                      physics: const BouncingScrollPhysics(),
+                      child: Column(
+                        children: _buildFeaturesList(widget.title),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                SafeArea(
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => ProfileSetup(
+                              selectedPlan: widget.title,
+                              mobileNumber: widget.mobilenumber,
+                            ),
                           ),
                         );
                       },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        'Choose ${widget.title}',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
           ),
+          Positioned(
+            top: 8,
+            right: 8,
+            child: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                width: 30,
+                height: 30,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.close, color: Colors.black),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildPackageOption(
-    BuildContext context,
+  Widget _buildPlanOption(
     String title,
-    String subtitle,
     String price,
-    String time,
-    Color gradientColor1,
-    Color gradientColor2,
-    BoxConstraints constraints,
+    String subtitle,
+    bool isSelected,
+    VoidCallback onTap,
   ) {
-    double cardWidth =
-        constraints.maxWidth > 600 ? 255 : constraints.maxWidth * 0.8;
     return GestureDetector(
-      onTap: () => _showPackageDetails(
-          context, title, price, gradientColor1, gradientColor2),
-      child: MovingGradientBorder(
-        width: cardWidth,
-        height: 90,
-        gradientColors: [
-          gradientColor1,
-          gradientColor2,
-          gradientColor1,
-        ],
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-          decoration: BoxDecoration(
-            color: Colors.black54,
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Text(
+      onTap: onTap,
+      child: Stack(
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            padding: EdgeInsets.all(isSelected ? 16.0 : 12.0),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? const Color.fromARGB(255, 238, 235, 235)
+                  : Colors.transparent,
+              border: Border.all(
+                color: Colors.white,
+                width: 1,
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
                   title,
-                  style: const TextStyle(
-                    color: Colors.orange,
-                    fontSize: 20,
+                  style: TextStyle(
+                    color: isSelected ? Colors.black : Colors.white,
+                    fontSize: isSelected ? 18 : 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Center(
-                child: Text(
-                  'Must Have $subtitle',
-                  style: const TextStyle(color: Colors.white70),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Text(
+                      '₹',
+                      style: TextStyle(
+                        color: isSelected ? Colors.black : Colors.white,
+                        fontSize: isSelected ? 20 : 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      price,
+                      style: TextStyle(
+                        color: isSelected ? Colors.black : Colors.white,
+                        fontSize: isSelected ? 24 : 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showPackageDetails(BuildContext context, String title, String price,
-      Color gradientColor1, Color gradientColor2) {
-    showDialog(
-      context: context,
-      // barrierDismissible: false,
-      builder: (BuildContext context) {
-        return TweenAnimationBuilder(
-          duration: const Duration(milliseconds: 300),
-          tween: Tween<double>(begin: 0, end: 1),
-          builder: (BuildContext context, double value, Widget? child) {
-            return Transform.scale(
-              scale: value,
-              child: Opacity(
-                opacity: value,
-                child: Dialog(
-                  backgroundColor: Colors.transparent,
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      double maxWidth = constraints.maxWidth > 650
-                          ? 500
-                          : constraints.maxWidth;
-                      double maxHeight = constraints.maxHeight > 900
-                          ? 780
-                          : constraints.maxHeight * 0.75;
-                      Color gradientColor3 = Colors.red;
-                      Color gradientColor4 =
-                          const Color.fromARGB(255, 231, 57, 44);
-                      return Container(
-                        constraints: BoxConstraints(
-                            maxWidth: maxWidth, maxHeight: maxHeight),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          border: Border.all(
-                              color: const Color.fromARGB(138, 250, 250, 250),
-                              width: 1.2),
-                        ),
-                        child: MovingGradientBorder(
-                          width: maxWidth,
-                          height: maxHeight,
-                          gradientColors: [
-                            gradientColor1.withOpacity(0.90),
-                            gradientColor2.withOpacity(0.90),
-                            gradientColor1.withOpacity(0.90),
-                          ],
-                          child: Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(0),
-                                child: SingleChildScrollView(
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      const SizedBox(height: 20),
-                                      Text(
-                                        title.toUpperCase(),
-                                        style: const TextStyle(
-                                          color: Colors.orange,
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 20),
-                                      ..._getFeatures(title, gradientColor1,
-                                          gradientColor2),
-                                      ..._getFeatures2(title, gradientColor3,
-                                          gradientColor4),
-                                      const SizedBox(height: 30),
-                                      MovingGradientBorder2(
-                                        width: maxWidth,
-                                        height: 40,
-                                        gradientColors: [
-                                          gradientColor1,
-                                          gradientColor2,
-                                          gradientColor1,
-                                        ],
-                                        child: Center(
-                                          child: Text(
-                                            price,
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 24,
-                                              fontWeight: FontWeight.w900,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 30),
-                                      PremiumShimmerButton(
-                                        width: 160,
-                                        height: 40,
-                                        gradientColors: [
-                                          gradientColor1,
-                                          gradientColor2,
-                                          gradientColor3
-                                        ],
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                          Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                              builder: (_) => SignUpPage(
-                                                  selectedPlan: title),
-                                            ),
-                                          );
-                                        },
-                                        child: const Text(
-                                          'Subscribe',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.w900,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 10),
-                                      GestureDetector(
-                                        onTap: () =>
-                                            Navigator.of(context).pop(),
-                                        child: Container(
-                                          decoration: const BoxDecoration(
-                                            color: Colors.transparent,
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: const Padding(
-                                            padding: EdgeInsets.all(7.0),
-                                            child: TextButton(
-                                              onPressed: null,
-                                              child: Text(
-                                                "Choose other Plan",
-                                                style: TextStyle(
-                                                  fontSize: 16.0,
-                                                  color: Colors.white24,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    color: isSelected ? Colors.black54 : Colors.white70,
+                    fontSize: isSelected ? 14 : 12,
                   ),
                 ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  // String _formatPrice(int price) {
-  //   return price.toString().replaceAllMapped(
-  //         RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-  //         (Match m) => '${m[1]},',
-  //       );
-  // }
-
-  List<Widget> _getFeatures(
-      String title, Color gradientColor1, Color gradientColor2) {
-    List<String> features;
-    switch (title.toLowerCase()) {
-      case 'standard':
-        features = [
-          'Must Have 100K+ Followers.',
-          'Upto 4 Themes/Skins for the game',
-          'Monthly Feature Slots for the games.',
-          'Performance-Based Event Unlock.',
-          'Referral Bonus',
-          'Analytics Dashboard',
-          'Priority Support',
-          'Unique Game invite link.',
-          'Limited Games Access.'
-        ];
-        break;
-      case 'pro':
-        features = [
-          'Must Have 500K+ Followers.',
-          'Updated Daily Game Publish Limit.',
-          'Upto 6 Themes/Skins for the game',
-          'Daily/Monthly Feature Slots for the games.',
-          'Performance-Based Events Unlock.',
-          'Referral Bonus',
-          'Analytics Dashboard',
-          'Priority Support',
-          'Unique Game invite link.',
-          'Daily/ Weekly League Access option.',
-          'Limited Time Tournament Access option.',
-          'Weekly/Monthly Promotional Activities.',
-          'Updated Games Access.',
-        ];
-        break;
-      case 'elite':
-        features = [
-          'Must-Have 1M+ Followers.',
-          'Updated Daily Game Publish Limit.',
-          'Upto 12 Themes/Skins for the game',
-          'Daily/Weekly/Monthly Feature Slots for the games.',
-          'Daily/ Weekly/Monthly League Access option.',
-          'Daily/Weekly/Monthly Tournament Access option.',
-          'Daily/Weekly/Monthly Promotional Activities.',
-          'Special Events Access.',
-          'Referral Bonus',
-          'Analytics Dashboard',
-          'Customized Game invite link.',
-          'All Platform Games Access.',
-          'Priority Access to Beta Features.',
-          'Additional Event Customization Options',
-          'Dedicated Relationship Manager'
-        ];
-        break;
-      case 'enterprise':
-      default:
-        features = [
-          'Customized Features and Plan Details',
-          'Custom Plans For Business Individuals Only',
-          '10x Return',
-        ];
-        break;
-    }
-
-    return features.map((feature) {
-      return Padding(
-        padding: const EdgeInsets.all(8),
-        child: Row(
-          children: [
-            GradientCheckbox(
-              gradientColors: [gradientColor1, gradientColor2],
-              value: true,
-              onChanged: (bool? value) {},
+              ],
             ),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                feature,
-                style: const TextStyle(color: Colors.white70),
-              ),
-            ),
-          ],
-        ),
-      );
-    }).toList();
-  }
-
-  List<Widget> _getFeatures2(
-      String title, Color gradientColor1, Color gradientColor2) {
-    List<String> features;
-    switch (title.toLowerCase()) {
-      case 'standard':
-        features = [
-          'No Daily/ Weekly League Access option.',
-          'No Daily/ Weekly Tournament Access option.',
-          'No Dedicated Relationship Manager',
-          'No Daily/ Weekly Promotional Activities.',
-          'No Event Customization Option',
-        ];
-        break;
-      case 'pro':
-        features = [
-          'Limited Event Customization Options',
-          'No Dedicated Relationship Manager'
-        ];
-        break;
-      case 'elite':
-        features = [];
-        break;
-      case 'enterprise':
-      default:
-        features = [];
-        break;
-    }
-
-    return features.map((feature) {
-      return Padding(
-        padding: const EdgeInsets.all(8),
-        child: Row(
-          children: [
-            GradientCheckbox2(
-              gradientColors: [gradientColor1, gradientColor2],
-              value: true,
-              onChanged: (bool? value) {},
-            ),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                feature,
-                style: const TextStyle(color: Colors.white70),
-              ),
-            ),
-          ],
-        ),
-      );
-    }).toList();
-  }
-}
-
-class MovingGradientBorder extends StatefulWidget {
-  final Widget child;
-  final double width;
-  final double height;
-  final List<Color> gradientColors;
-
-  const MovingGradientBorder({
-    super.key,
-    required this.child,
-    required this.width,
-    required this.height,
-    required this.gradientColors,
-  });
-
-  @override
-  _MovingGradientBorderState createState() => _MovingGradientBorderState();
-}
-
-class _MovingGradientBorderState extends State<MovingGradientBorder>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(seconds: 3),
-      vsync: this,
-    )..repeat(reverse: true);
-    _animation = Tween<double>(begin: 0, end: 1).animate(_controller);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        AnimatedBuilder(
-          animation: _animation,
-          builder: (context, child) {
-            return Container(
-              width: widget.width + 1,
-              height: widget.height + 1,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-                gradient: LinearGradient(
-                  colors: widget.gradientColors,
-                  stops: [
-                    _animation.value - 0.2,
-                    _animation.value,
-                    _animation.value + 0.2,
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+          ),
+          if (isSelected)
+            Positioned(
+              top: 8,
+              right: 8,
+              child: Container(
+                padding: const EdgeInsets.all(2),
+                decoration: const BoxDecoration(
+                  color: Colors.green,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.check,
+                  color: Colors.white,
+                  size: 16,
                 ),
               ),
-            );
-          },
-        ),
-        Container(
-          width: widget.width,
-          height: widget.height,
-          decoration: BoxDecoration(
-            color: const Color.fromARGB(86, 0, 0, 0),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: widget.child,
-        ),
-      ],
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-}
-
-class MovingGradientBorder2 extends StatefulWidget {
-  final Widget child;
-  final double width;
-  final double height;
-  final List<Color> gradientColors;
-
-  const MovingGradientBorder2({
-    super.key,
-    required this.child,
-    required this.width,
-    required this.height,
-    required this.gradientColors,
-  });
-
-  @override
-  _MovingGradientBorder2State createState() => _MovingGradientBorder2State();
-}
-
-class _MovingGradientBorder2State extends State<MovingGradientBorder2>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(seconds: 3),
-      vsync: this,
-    )..repeat(reverse: true);
-    _animation = Tween<double>(begin: 0, end: 1).animate(_controller);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        AnimatedBuilder(
-          animation: _animation,
-          builder: (context, child) {
-            return Container(
-              width: widget.width + 1,
-              height: widget.height + 1,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(0),
-                gradient: LinearGradient(
-                  colors: widget.gradientColors,
-                  stops: [
-                    _animation.value - 0.2,
-                    _animation.value,
-                    _animation.value + 0.2,
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-              ),
-            );
-          },
-        ),
-        Container(
-          width: widget.width,
-          height: widget.height,
-          decoration: BoxDecoration(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(0),
-          ),
-          child: widget.child,
-        ),
-      ],
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-}
-
-class GradientCheckbox extends StatelessWidget {
-  final List<Color> gradientColors;
-  final bool value;
-  final ValueChanged<bool?>? onChanged;
-
-  const GradientCheckbox({
-    super.key,
-    required this.gradientColors,
-    required this.value,
-    this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        if (onChanged != null) {
-          onChanged!(!value);
-        }
-      },
-      child: Container(
-        width: 13,
-        height: 13,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(50),
-          gradient: LinearGradient(
-            colors: gradientColors,
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: value
-            ? const Icon(
-                Icons.check_circle_outline_sharp,
-                size: 15,
-                color: Colors.white,
-              )
-            : null,
+            ),
+        ],
       ),
     );
   }
 }
 
-class GradientCheckbox2 extends StatelessWidget {
-  final List<Color> gradientColors;
-  final bool value;
-  final ValueChanged<bool?>? onChanged;
-
-  const GradientCheckbox2({
-    super.key,
-    required this.gradientColors,
-    required this.value,
-    this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        if (onChanged != null) {
-          onChanged!(!value);
-        }
-      },
-      child: Container(
-        width: 13,
-        height: 13,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(50),
-          gradient: LinearGradient(
-            colors: gradientColors,
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: value
-            ? const Icon(
-                Icons.remove_circle_outline_sharp,
-                size: 15,
-                color: Colors.white,
-              )
-            : null,
-      ),
-    );
-  }
-}
+// int _calculateSavings(int monthlyPrice, int annualPrice) {
+//   double monthlyTotal = monthlyPrice * 12;
+//   double savings = monthlyTotal - annualPrice;
+//   return ((savings / monthlyTotal) * 100).round();
+// }

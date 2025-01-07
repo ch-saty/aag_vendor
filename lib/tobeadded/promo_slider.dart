@@ -106,8 +106,7 @@ class _PromotionalsSliderState extends State<PromotionalsSlider>
 
           // Positioned dot indicator at the bottom of the image
           Positioned(
-            bottom:
-                52, // Adjust this to set how far from the bottom you want the dots
+            bottom: 56,
             left: 0,
             right: 0,
             child: Row(

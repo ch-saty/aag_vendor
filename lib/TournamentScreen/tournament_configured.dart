@@ -1,10 +1,11 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:math';
 
 import 'package:AAG/TournamentScreen/publishedtournamentscreen.dart';
 import 'package:AAG/TournamentScreen/scheduletournamentscreen_2.dart';
 import 'package:AAG/tobeadded/gradient_button.dart';
 import 'package:flutter/material.dart';
-import 'dart:ui';
 
 import 'package:intl/intl.dart';
 
@@ -21,11 +22,6 @@ class _TournamentConfiguredScreenState extends State<TournamentConfiguredScreen>
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
   late AnimationController _gradientAnimationController;
-  late Animation<double> _gradientAnimation;
-  late Animation<double> _rotationAnimation;
-  late Animation<double> _scaleAnimation;
-  late Animation<Color?> _colorAnimation1;
-  late Animation<Color?> _colorAnimation2;
 
   @override
   void initState() {
@@ -34,37 +30,6 @@ class _TournamentConfiguredScreenState extends State<TournamentConfiguredScreen>
       duration: const Duration(seconds: 10),
       vsync: this,
     )..repeat();
-
-    _gradientAnimation = Tween<double>(begin: -1.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _gradientAnimationController,
-        curve: Curves.linear,
-      ),
-    );
-
-    _rotationAnimation = Tween<double>(begin: 0.0, end: 2 * 3.14159).animate(
-      CurvedAnimation(
-        parent: _gradientAnimationController,
-        curve: Curves.linear,
-      ),
-    );
-
-    _scaleAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
-      CurvedAnimation(
-        parent: _gradientAnimationController,
-        curve: Curves.easeInOut,
-      ),
-    );
-
-    _colorAnimation1 = ColorTween(
-      begin: Colors.purple.shade400,
-      end: Colors.purple.shade800,
-    ).animate(_gradientAnimationController);
-
-    _colorAnimation2 = ColorTween(
-      begin: Colors.deepPurple.shade400,
-      end: Colors.deepPurple.shade800,
-    ).animate(_gradientAnimationController);
   }
 
   @override
@@ -78,269 +43,212 @@ class _TournamentConfiguredScreenState extends State<TournamentConfiguredScreen>
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
         ),
-        title: const Text(
-          'TOURNAMENT',
+        title: Text(
+          "TOURNAMENT",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
+        backgroundColor: const Color.fromARGB(255, 102, 44, 144),
       ),
-      body: Stack(
-        children: [
-          Image.asset(
-            'lib/images/idkbg.jpg',
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            fit: BoxFit.cover,
-          ),
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.black.withOpacity(0.2),
-                  Colors.purple.withOpacity(0.1),
-                  Colors.deepPurple.withOpacity(0.1),
-                ],
-              ),
-            ),
-          ),
-          // Animated background with concentric circles
-          // CustomPaint(
-          //   size: Size(MediaQuery.of(context).size.width,
-          //       MediaQuery.of(context).size.height),
-          //   painter: ConcentricCirclesPainter(
-          //     animation: _gradientAnimationController,
-          //     rotationAnimation: _rotationAnimation,
-          //     scaleAnimation: _scaleAnimation,
-          //     colorAnimation1: _colorAnimation1,
-          //     colorAnimation2: _colorAnimation2,
-          //   ),
-          // ),
-          // Content
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: const DecorationImage(
-                      image: AssetImage('lib/images/ch.png'),
-                      fit: BoxFit.cover,
+      body: Container(
+        color: Colors.white,
+        child: Stack(
+          children: [
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                      width: 129,
+                      height: 208,
+                      child: Image.asset(
+                        'lib/images/mycard.png',
+                        fit: BoxFit.contain,
+                      )),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Your Tournament has\n  been Configured',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.orange,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.purple.withOpacity(0.1),
-                        spreadRadius: 2,
-                        blurRadius: 10,
+                  ),
+                  const SizedBox(height: 32),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CustomButton(
+                        text: 'Publish',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const TournamentPublishedScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(width: 20),
+                      CustomButton(
+                        text: 'Schedule',
+                        onTap: () => _showSchedulePopup(),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 24),
-                const Text(
-                  'Your Tournament has\n  been Configured',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.orange,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 32),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CustomButton(
-                      text: 'Publish',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const TournamentPublishedScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(width: 20),
-                    CustomButton(
-                      text: 'Schedule',
-                      onTap: () => _showSchedulePopup(),
-                    ),
-                  ],
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Future<void> _showSchedulePopup() async {
+    DateTime? selectedDate;
+    TimeOfDay? selectedTime;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: const Color.fromARGB(255, 102, 44, 144),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
       ),
       builder: (BuildContext context) {
-        return AnimatedBuilder(
-          animation: _gradientAnimationController,
-          builder: (context, child) {
-            return ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(25)),
-              child: CustomPaint(
-                painter: ComplexGradientPainter(
-                  animation: _gradientAnimation,
-                  rotationAnimation: _rotationAnimation,
-                  scaleAnimation: _scaleAnimation,
-                  colorAnimation1: _colorAnimation1,
-                  colorAnimation2: _colorAnimation2,
-                ),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius:
-                          const BorderRadius.vertical(top: Radius.circular(25)),
-                      color: Colors.black.withOpacity(0.1),
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Container(
+              decoration: BoxDecoration(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(25)),
+              ),
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                    20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Schedule Game',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(20, 20, 20,
-                          MediaQuery.of(context).viewInsets.bottom + 20),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
+                    Container(
+                      margin: const EdgeInsets.symmetric(vertical: 15),
+                      height: 1,
+                      color: Colors.white24,
+                    ),
+                    ListTile(
+                      title: const Text(
+                        'Select Date',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Schedule Tournament',
+                          Text(
+                            selectedDate != null
+                                ? DateFormat('EEE, MMM d, yyyy')
+                                    .format(selectedDate!)
+                                : 'Choose a date',
                             style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              shadows: [
-                                Shadow(
-                                  blurRadius: 8.0,
-                                  color: Colors.black26,
-                                  offset: Offset(2.0, 2.0),
-                                ),
-                              ],
+                              color: Colors.white.withOpacity(0.7),
                             ),
-                          ),
-                          Container(
-                            margin: const EdgeInsets.symmetric(vertical: 15),
-                            height: 1,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment(_gradientAnimation.value, 0),
-                                end: Alignment(-_gradientAnimation.value, 0),
-                                colors: const [
-                                  Colors.white24,
-                                  Colors.white,
-                                  Colors.white24,
-                                ],
-                              ),
-                            ),
-                          ),
-                          ListTile(
-                            title: const Text(
-                              'Select Date',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            subtitle: Text(
-                              selectedDate != null
-                                  ? DateFormat('EEE, MMM d, yyyy')
-                                      .format(selectedDate!)
-                                  : 'Choose a date',
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.7),
-                              ),
-                            ),
-                            trailing: Icon(
-                              Icons.calendar_today,
-                              color: Colors.white.withOpacity(0.9),
-                            ),
-                            onTap: () async {
-                              final DateTime? pickedDate = await showDatePicker(
-                                context: context,
-                                initialDate: DateTime.now(),
-                                firstDate: DateTime.now(),
-                                lastDate: DateTime(2101),
-                              );
-                              if (pickedDate != null) {
-                                setState(() {
-                                  selectedDate = pickedDate;
-                                });
-                              }
-                            },
-                          ),
-                          ListTile(
-                            title: const Text(
-                              'Select Time',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            subtitle: Text(
-                              selectedTime != null
-                                  ? selectedTime!.format(context)
-                                  : 'Choose a time',
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.7),
-                              ),
-                            ),
-                            trailing: Icon(
-                              Icons.access_time,
-                              color: Colors.white.withOpacity(0.9),
-                            ),
-                            onTap: () async {
-                              final TimeOfDay? pickedTime =
-                                  await showTimePicker(
-                                context: context,
-                                initialTime: TimeOfDay.now(),
-                              );
-                              if (pickedTime != null) {
-                                setState(() {
-                                  selectedTime = pickedTime;
-                                });
-                              }
-                            },
-                          ),
-                          const SizedBox(height: 20),
-                          CustomButton(
-                            onTap: () {
-                              if (selectedDate != null &&
-                                  selectedTime != null) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const EditableScheduledTournamentScreen(),
-                                  ),
-                                );
-                              }
-                            },
-                            text: 'Schedule',
                           ),
                         ],
                       ),
+                      trailing: Icon(
+                        Icons.calendar_today,
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                      onTap: () async {
+                        DateTime? pickedDate = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime(2101),
+                        );
+                        if (pickedDate != null) {
+                          setState(() {
+                            selectedDate = pickedDate;
+                          });
+                        }
+                      },
                     ),
-                  ),
+                    ListTile(
+                      title: const Text(
+                        'Select Time',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            selectedTime != null
+                                ? selectedTime!.format(context)
+                                : 'Choose a time',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.7),
+                            ),
+                          ),
+                        ],
+                      ),
+                      trailing: Icon(
+                        Icons.access_time,
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                      onTap: () async {
+                        TimeOfDay? pickedTime = await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay.now(),
+                        );
+                        if (pickedTime != null) {
+                          setState(() {
+                            selectedTime = pickedTime;
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const EditableScheduledTournamentScreen(),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.black,
+                        backgroundColor: Colors.white,
+                        minimumSize: Size(double.infinity, 48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text('Schedule'),
+                    ),
+                  ],
                 ),
               ),
             );
